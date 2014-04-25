@@ -1,0 +1,12 @@
+*.pyc
+
+*.out
+
+# Q-Chem output
+*.qcout
+
+# ORCA output
+*.gbw
+*.ges
+*.prop
+*.trj
