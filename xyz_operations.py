@@ -80,18 +80,19 @@ def write_individual_fragments(filename):
     # the number of fragments is the length of any of the returned lists
     nfragments = len(frag_charges)
     # string templates
-    sf = os.path.splitext(filename)[0] + '.F{}.xyz'
-    sc = '{} {} {}\n'
-    sa = '{:3} {:12.7f} {:12.7f} {:12.7f}\n'
+    sftemp = os.path.splitext(filename)[0] + '.F{}.xyz'
+    sctemp = '{} {} {}\n'
+    satemp = '{:3} {:12.7f} {:12.7f} {:12.7f}\n'
     # generate a single XYZ file for each fragment
-    for f in range(nfragments):
-        with open(sf.format(f), 'w') as xyzfile:
-            xyzfile.write('{}\n'.format(len(atoms[f])))
-            xyzfile.write(sc.format(frag_charges[f],
-                                    frag_multiplicities[f],
-                                    comments[f]))
-            for atom in range(len(atoms[f])):
-                xyzfile.write(sa.format(atoms[f][atom], *coords[f][atom]))
+    for fid in range(nfragments):
+        with open(sftemp.format(fid), 'w') as xyzfile:
+            xyzfile.write('{}\n'.format(len(atoms[fid])))
+            xyzfile.write(sctemp.format(frag_charges[fid],
+                                        frag_multiplicities[fid],
+                                        comments[fid]))
+            for atom in range(len(atoms[fid])):
+                xyzfile.write(satemp.format(atoms[fid][atom],
+                                            *coords[fid][atom]))
 
 if __name__ == '__main__':
     import os
