@@ -31,6 +31,7 @@ def read_fragment_xyz(filename):
     coords = []
     frag_atoms = []
     frag_coords = []
+    atom_count = 0
     with open(filename, 'r') as fragfile:
         # the very first line is the system's total charge and multiplicity
         sys_charge, sys_multiplicity \
@@ -61,13 +62,14 @@ def read_fragment_xyz(filename):
                 atom_coords = list(map(float, line.split()[1:]))
                 frag_atoms.append(atom)
                 frag_coords.append(atom_coords)
+                atom_count += 1
         # these need to be here otherwise the last fragment
         # will never be appended
         atoms.append(frag_atoms)
         coords.append(frag_coords)
 
     return (sys_charge, sys_multiplicity, frag_charges, frag_multiplicities,
-            atoms, coords, comments)
+            atoms, coords, comments, atom_count)
 
 
 def write_individual_fragments(filename):
@@ -76,7 +78,7 @@ def write_individual_fragments(filename):
     files, and write them to disk.
     """
     sys_charge, sys_multiplicity, frag_charges, frag_multiplicities, \
-        atoms, coords, comments = read_fragment_xyz(filename)
+        atoms, coords, comments, atom_count = read_fragment_xyz(filename)
     # the number of fragments is the length of any of the returned lists
     nfragments = len(frag_charges)
     # string templates
@@ -94,6 +96,24 @@ def write_individual_fragments(filename):
                 xyzfile.write(satemp.format(atoms[fid][atom],
                                             *coords[fid][atom]))
 
+
+def write_full_system(filename):
+    """
+    Read a combined fragment XYZ file and write a normal XYZ file of the
+    full system.
+    """
+    sys_charge, sys_multiplicity, frag_charges, frag_multiplicities, \
+        atoms, coords, comments, atom_count = read_fragment_xyz(filename)
+    nfragments = len(frag_charges)
+    sftemp = os.path.splitext(filename)[0] + '.FULL.xyz'
+    satemp = '{:3} {:12.7f} {:12.7f} {:12.7f}\n'
+    with open(sftemp, 'w') as xyzfile:
+        xyzfile.write('{}\n\n'.format(atom_count))
+        for fid in range(nfragments):
+            for atom in range(len(atoms[fid])):
+                xyzfile.write(satemp.format(atoms[fid][atom],
+                                            *coords[fid][atom]))
+
 if __name__ == '__main__':
     import os
     import argparse
@@ -104,3 +124,4 @@ if __name__ == '__main__':
     fraginpfile = args.fraginpfile
 
     write_individual_fragments(fraginpfile)
+    write_full_system(fraginpfile)
