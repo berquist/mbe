@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+import os
+
 import MBE
 
-filename = "example.xyz"
+filename = os.path.join(os.environ['HOME'], "repos/MBE/tests/example.xyz")
 
 monomers = MBE.fragment.generate_fragment_objects(filename)
 
@@ -37,3 +39,13 @@ for term in term_dict:
     fragments.append(fragment)
 
 print "Generated all fragment combinations."
+print "Submitting all fragment calculations."
+
+for fragment in fragments:
+    print fragment.fxyz
+
+# results = []
+# for fragment in fragments:
+#     # submit a PBS job for every fragment
+#     result = MBE.pbs.submit_fragment_job(fragment)
+#     results.append(result)

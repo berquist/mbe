@@ -77,6 +77,7 @@ class Fragment(object):
         """
         new = Fragment()
         new.name = other.name + self.name
+        new.fxyz = os.path.join(os.path.dirname(self.fxyz), new.name + ".xyz")
         new.charge = other.charge + self.charge
         if other.multiplicity == self.multiplicity:
             new.multiplicity = 1
@@ -105,6 +106,7 @@ def combine_two_fragments(x, y):
     """
     new = Fragment()
     new.name = x.name + y.name
+    new.fxyz = os.path.join(os.path.dirname(x.fxyz), new.name + ".xyz")
     new.charge = x.charge + y.charge
     if x.multiplicity == y.multiplicity:
         new.multiplicity = 1
@@ -134,6 +136,8 @@ def combine_fragment_sequence(f):
         new.coords += fragment.coords
         new.nfragments += fragment.nfragments
         new.symbol_repr.union(fragment.symbol_repr)
+    # assume that all fragments we're combining live in the same directory
+    new.fxyz = os.path.join(os.path.dirname(f[0].fxyz), new.name + ".xyz")
     return new
 
 
