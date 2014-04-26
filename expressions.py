@@ -29,13 +29,15 @@ def invert_map(m):
     return im
 
 
-# def gen_dict_str2term(strdict):
-#     """
-#     Given a dictionary that maps terms to strings, return a new dictionary
-#     of the inverse map.
-#     """
-#     ...
-#     return newdict
+def gen_dict_symbol2monomer(monomers):
+    """
+    Given a sequence of monomers, create a map of monomer symbols
+    to monomer objects.
+    """
+    newdict = dict()
+    for monomer in monomers:
+        newdict[next(iter(monomer.symbol_repr))] = monomer
+    return newdict
 
 
 def T1(f):
@@ -75,6 +77,37 @@ def T3(f):
                           (f[j]*f[k] - f[j] - f[k]) -
                           (f[k]*f[i] - f[k] - f[i]))
     return terms
+
+
+def Tn(f, n):
+    """
+    Generate N-body terms.
+    """
+    terms = 0
+
+    return terms
+
+
+def MBE1(f):
+    """
+    Generate the full 1st-order many-body expansion expression.
+    """
+    return T1(f)
+
+
+def MBE2(f):
+    """
+    Generate the full 2nd-order many-body expansion expression.
+    """
+    return MBE1(f) + T2(f)
+
+
+def MBE3(f):
+    """
+    Generate the full 3rd-order many-body expansion expression.
+    """
+    return MBE2(f) + T3(f)
+
 
 if __name__ == '__main__':
     from sympy import var, I, symbols
