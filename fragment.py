@@ -60,10 +60,12 @@ class Fragment(object):
         Write an XYZ file to disk, with the charge and multiplicity stored
         in the comment line.
         """
-        stemp = "{:2s} {:f} {:f} {:f}\n"
+        satemp = "{:3s} {:12.7f} {:12.7f} {:12.7f}\n"
         with open(fxyz, "w") as xyzhandle:
+            xyzhandle.write(str(len(self.atoms)) + "\n")
+            xyzhandle.write(self.comment + "\n")
             for atom, coords in zip(self.atoms, self.coords):
-                xyzhandle.write(stemp.format(atom, *coords))
+                xyzhandle.write(satemp.format(atom, *coords))
 
     def __str__(self):
         return self.name
@@ -78,6 +80,7 @@ class Fragment(object):
         new = Fragment()
         new.name = other.name + self.name
         new.fxyz = os.path.join(os.path.dirname(self.fxyz), new.name + ".xyz")
+        new.comment = other.comment + " :: " + self.comment
         new.charge = other.charge + self.charge
         if other.multiplicity == self.multiplicity:
             new.multiplicity = 1
@@ -107,6 +110,7 @@ def combine_two_fragments(x, y):
     new = Fragment()
     new.name = x.name + y.name
     new.fxyz = os.path.join(os.path.dirname(x.fxyz), new.name + ".xyz")
+    new.comment = x.comment + " :: " + y.comment
     new.charge = x.charge + y.charge
     if x.multiplicity == y.multiplicity:
         new.multiplicity = 1
@@ -127,6 +131,7 @@ def combine_fragment_sequence(f):
     new = Fragment()
     for fragment in f:
         new.name += fragment.name
+        new.comment += "{} :: ".format(fragment.comment)
         new.charge += fragment.charge
         if new.multiplicity == fragment.multiplicity:
             new.multiplicity = 1
