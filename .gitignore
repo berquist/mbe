@@ -1,6 +1,7 @@
 *.pyc
 .#*
 *.out
+*.bak
 
 # Q-Chem output
 *.qcout
