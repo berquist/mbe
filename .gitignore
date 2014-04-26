@@ -13,11 +13,11 @@
 *.trj
 
 # fragment test output
-tests/example.F0.xyz
-tests/example.F1.xyz
-tests/example.F2.xyz
-tests/example.F3.xyz
-tests/example.F4.xyz
-tests/example.F5.xyz
-tests/example.F6.xyz
-tests/example.FULL.xyz
+tests/example_F0.xyz
+tests/example_F1.xyz
+tests/example_F2.xyz
+tests/example_F3.xyz
+tests/example_F4.xyz
+tests/example_F5.xyz
+tests/example_F6.xyz
+tests/example_FULL.xyz
