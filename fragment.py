@@ -3,6 +3,8 @@
 import os
 import sympy
 
+from MBE.xyz_operations import read_fragment_xyz
+
 
 class Fragment(object):
     """
@@ -95,3 +97,33 @@ class Fragment(object):
         new = self.combine(other)
         new.write(fxyz)
         return new
+
+
+def generate_fragment_objects(filename):
+    """
+    Generate a list of Fragment() objects given a fragment-style
+    XYZ file (Q-Chem, Psi4).
+    """
+    sys_charge, sys_multiplicity, frag_charges, frag_multiplicities, \
+        atoms, coords, comments, atom_count = read_fragment_xyz(filename)
+
+    sntemp = os.path.splitext(os.path.basename(filename))[0] + '_F{}'
+    sftemp = os.path.join(os.path.dirname(filename), sntemp + '.xyz')
+
+    fragments = []
+    n = len(frag_charges)
+    for fid in range(n):
+        fragment = Fragment()
+        fragment.fxyz = sftemp.format(fid)
+        fragment.name = sntemp.format(fid)
+        fragment.comment = comments[fid]
+        fragment.charge = frag_charges[fid]
+        fragment.multiplicities = frag_multiplicities[fid]
+        fragment.atoms = atoms[fid]
+        fragment.coords = coords[fid]
+        fragment.nfragments += 1
+        fragment.active = fragment.is_active()
+        fragment.symbol_repr.append(sympy.S(fragment.name))
+        fragments.append(fragment)
+
+    return fragments
