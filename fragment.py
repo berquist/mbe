@@ -21,7 +21,7 @@ class Fragment(object):
         self.coords = []
         self.nfragments = 0
         self.active = False
-        self.symbol_repr = []
+        self.symbol_repr = set()
 
     def is_active(self):
         """
@@ -53,7 +53,7 @@ class Fragment(object):
                 self.coords.append(list(map(float, line.split()[1:])))
         self.nfragments += 1
         self.active = self.is_active()
-        self.symbol_repr.append(sympy.S(self.name))
+        self.symbol_repr = set(sympy.S(self.name))
 
     def write(self, fxyz):
         """
@@ -86,7 +86,7 @@ class Fragment(object):
         new.coords = other.coords + self.coords
         new.nfragments = other.nfragments + self.nfragments
         new.active = other.active ^ self.active
-        new.symbol_repr = other.symbol_repr + self.symbol_repr
+        new.symbol_repr = set.union(other.symbol_repr, self.symbol_repr)
         return new
 
     def combine_write(self, other, fxyz):
@@ -97,6 +97,44 @@ class Fragment(object):
         new = self.combine(other)
         new.write(fxyz)
         return new
+
+
+def combine_two_fragments(x, y):
+    """
+    Combine two fragments into one, returning a new fragment.
+    """
+    new = Fragment()
+    new.name = x.name + y.name
+    new.charge = x.charge + y.charge
+    if x.multiplicity == y.multiplicity:
+        new.multiplicity = 1
+    else:
+        new.multiplicity = 2
+    new.atoms = x.atoms + y.atoms
+    new.coords = x.coords + y.coords
+    new.nfragments = x.nfragments + y.nfragments
+    new.active = x.active ^ y.active
+    new.symbol_repr = set.union(x.symbol_repr, y.symbol_repr)
+    return new
+
+
+def combine_fragment_sequence(f):
+    """
+    Combine multiple fragments into one, returning a new fragment.
+    """
+    new = Fragment()
+    for fragment in f:
+        new.name += fragment.name
+        new.charge += fragment.charge
+        if new.multiplicity == fragment.multiplicity:
+            new.multiplicity = 1
+        else:
+            new.multiplicity = 2
+        new.atoms += fragment.atoms
+        new.coords += fragment.coords
+        new.nfragments += fragment.nfragments
+        new.symbol_repr.union(fragment.symbol_repr)
+    return new
 
 
 def generate_fragment_objects(filename):
@@ -123,7 +161,7 @@ def generate_fragment_objects(filename):
         fragment.coords = coords[fid]
         fragment.nfragments += 1
         fragment.active = fragment.is_active()
-        fragment.symbol_repr.append(sympy.S(fragment.name))
+        fragment.symbol_repr.add(sympy.S(fragment.name))
         fragments.append(fragment)
 
     return fragments
