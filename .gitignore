@@ -1,5 +1,5 @@
 *.pyc
-
+.#*
 *.out
 
 # Q-Chem output
@@ -10,3 +10,12 @@
 *.ges
 *.prop
 *.trj
+
+# fragment test output
+fragments.F0.xyz
+fragments.F1.xyz
+fragments.F2.xyz
+fragments.F3.xyz
+fragments.F4.xyz
+fragments.F5.xyz
+fragments.F6.xyz
