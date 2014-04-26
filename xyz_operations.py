@@ -82,7 +82,7 @@ def write_individual_fragments(filename):
     # the number of fragments is the length of any of the returned lists
     nfragments = len(frag_charges)
     # string templates
-    sftemp = os.path.splitext(filename)[0] + '.F{}.xyz'
+    sftemp = os.path.splitext(filename)[0] + '_F{}.xyz'
     sctemp = '{} {} {}\n'
     satemp = '{:3} {:12.7f} {:12.7f} {:12.7f}\n'
     # generate a single XYZ file for each fragment
@@ -105,7 +105,7 @@ def write_full_system(filename):
     sys_charge, sys_multiplicity, frag_charges, frag_multiplicities, \
         atoms, coords, comments, atom_count = read_fragment_xyz(filename)
     nfragments = len(frag_charges)
-    sftemp = os.path.splitext(filename)[0] + '.FULL.xyz'
+    sftemp = os.path.splitext(filename)[0] + '_FULL.xyz'
     satemp = '{:3} {:12.7f} {:12.7f} {:12.7f}\n'
     with open(sftemp, 'w') as xyzfile:
         xyzfile.write('{}\n\n'.format(atom_count))
