@@ -12,18 +12,19 @@ def submit_fragment_job(fragment):
     Run an ORCA calculation on the given fragment through PBS.
     """
     fragment.write(fragment.fxyz)
-    eprname = os.path.splitext(fragment.fxyz)[0] + ".epr.inp"
-    pbsname = os.path.splitext(fragment.fxyz)[0] + ".epr.pbs"
+    stub = os.path.splitext(os.path.basename(fragment.fxyz))[0]
+    eprname = os.path.splitext(fragment.fxyz)[0] + ".inp"
+    pbsname = os.path.splitext(fragment.fxyz)[0] + ".pbs"
     eprhandle = open(eprname, "w")
     pbshandle = open(pbsname, "w")
     eprhandle.write(MBE.file_templates.eprfile(fragment.charge,
                                                fragment.multiplicity,
-                                               fragment.fxyz))
-    pbshandle.write(MBE.file_templates.pbsfile(fragment.fxyz))
+                                               stub))
+    pbshandle.write(MBE.file_templates.pbsfile(stub))
     eprhandle.close()
     pbshandle.close()
     os.chdir(os.path.dirname(pbsname))
-    pbsoutput = subprocess.check_output(["qsub", pbsname])
+    subprocess.call(["qsub", pbsname])
     eproutname = os.path.splitext(eprname)[0] + ".out"
     orcafile = orca_parser.ORCAOutputParser(eproutname)
     return orcafile
