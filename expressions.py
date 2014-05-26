@@ -19,6 +19,15 @@ def En(f, n):
     """Generate all possible n-body terms."""
     return sum(dEn(g, n) for g in combinations(f, n))
 
+def MBEn(f, n):
+    """Generate the full nth-order many-body expansion expression."""
+    if n < 1:
+        return 0
+    elif n == 1:
+        return En(f, n)
+    else:
+        return En(f, n) + MBEn(f, n - 1)
+
 if __name__ == '__main__':
     from sympy import symbols
 
