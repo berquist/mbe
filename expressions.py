@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
+"""mbe.expressions: Functions that generate SymPy expressions
+corresponding to arbitrary-order many-body expansions."""
+
 from sympy import prod
 from itertools import combinations
+
 
 def dEn(f, n):
     """Generate a single n-body term."""
@@ -15,9 +19,11 @@ def dEn(f, n):
             acc -= sum(dEn(g, i) for g in combinations(f, i))
         return acc
 
+
 def En(f, n):
     """Generate all possible n-body terms."""
     return sum(dEn(g, n) for g in combinations(f, n))
+
 
 def MBEn(f, n):
     """Generate the full nth-order many-body expansion expression."""

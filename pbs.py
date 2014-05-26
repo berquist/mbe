@@ -3,7 +3,7 @@
 import os
 import subprocess
 
-import MBE
+import mbe
 import orca_parser
 
 
@@ -44,5 +44,3 @@ if __name__ == '__main__':
     nodefile = []
     for line in nodefile_raw:
         nodefile.append(line.strip())
-
-    

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""mbe.file_templates: (Default) file templates for dealing with PBS,
+ORCA, and Q-Chem."""
 
 def eprfile(charge, multiplicity, xyzfile):
     """

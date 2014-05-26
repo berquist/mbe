@@ -1,5 +1,10 @@
-import expressions
-import file_templates
-import fragment
-import pbs
-import xyz_operations
+"""mbe: For performing many-body expansions (especially EPR g-tensor)
+using ORCA."""
+
+from . import expressions
+from . import expressions_explicit
+from . import file_templates
+from . import fragment
+from . import pbs
+from . import utils
+from . import xyz_operations

@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+"""mbe.expressions_explicit: Explicit formulation of formulas in
+mbe.expressions for some low orders."""
+
 from sympy import prod
 from itertools import combinations
 
@@ -14,8 +17,10 @@ def dE3(i, j, k):
     return i*j*k - dE2(i, j) - dE2(i, k) - dE2(j, k) - i - j - k
 def dE4(i, j, k, l):
     """Generate a single four-body term."""
-    return i*j*k*l - dE3(i, j, k) - dE3(j, k, l) - dE3(i, j, l) - dE3(i, k, l) \
-        - dE2(i, j) - dE2(j, k) - dE2(k, l) - dE2(i, k) - dE2(i, l) - dE2(j, l) \
+    return i*j*k*l \
+        - dE3(i, j, k) - dE3(j, k, l) - dE3(i, j, l) - dE3(i, k, l) \
+        - dE2(i, j) - dE2(j, k) - dE2(k, l) \
+        - dE2(i, k) - dE2(i, l) - dE2(j, l) \
         - i - j - k - l
 def dE2gen(i, j):
     """Generate a single two-body term."""
