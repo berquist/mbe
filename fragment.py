@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-
 import os
 import sympy
 
-from MBE.xyz_operations import read_fragment_xyz
+from mbe.xyz_operations import read_fragment_xyz
 
 
 class Fragment(object):

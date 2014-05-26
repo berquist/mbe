@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """mbe.utils: Utility functions that don't fit anywhere else."""
 
 def term2str(term):

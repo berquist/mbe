@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """mbe.expressions: Functions that generate SymPy expressions
 corresponding to arbitrary-order many-body expansions."""
 

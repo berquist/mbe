@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """mbe.xyz_operations: Functions for dealing with XYZ (*.xyz) files.
 (reading, writing, etc.)"""
 

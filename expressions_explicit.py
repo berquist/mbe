@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """mbe.expressions_explicit: Explicit formulation of formulas in
 mbe.expressions for some low orders."""
 
