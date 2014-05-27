@@ -1,3 +1,6 @@
+"""mbe.fragment: a class for dealing with Fragments and other standalone
+functions."""
+
 import os
 import sympy
 
