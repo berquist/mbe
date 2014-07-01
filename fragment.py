@@ -5,7 +5,7 @@ import os
 import sympy
 
 from mbe.xyz_operations import read_fragment_xyz
-
+from mbe.utils import gen_term_from_symlist
 
 class Fragment(object):
     """
@@ -178,3 +178,25 @@ def generate_fragment_objects(filename):
         fragments.append(fragment)
 
     return fragments
+
+
+def generate_fragment_from_term(term, termdict):
+    """
+    Given a SymPy term (part of an expression) and a map from symbols
+    to fragments, generate the fragment corresponding to the term.
+    """
+    atoms = term.atoms()
+    union = list()
+    for atom in atoms:
+        union.append(termdict[atom])
+    fragment = combine_fragment_sequence(union)
+    return fragment
+
+
+def generate_term_from_fragment(fragment):
+    """
+    Given a fragment object, generate a SymPy term corresponding to it
+    (either a Symbol or a Mul).
+    """
+    symbol_repr = list(fragment.symbol_repr)
+    return gen_term_from_symlist(symbol_repr)

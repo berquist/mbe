@@ -28,14 +28,34 @@ def invert_map(m):
     return im
 
 
-def gen_dict_symbol2monomer(monomers):
+def gen_dict_symbol2fragment(fragments):
     """
-    Given a sequence of monomers, create a map of monomer symbols
-    to monomer objects.
+    Given a sequence of fragments, create a map of fragment symbols
+    to fragment objects.
     """
     newdict = dict()
-    for monomer in monomers:
-        newdict[next(iter(monomer.symbol_repr))] = monomer
+    for fragment in fragments:
+        newdict[next(iter(fragment.symbol_repr))] = fragment
     return newdict
 
 
+def gen_dict_fragment2symbol(fragments):
+    """
+    Given a sequence of fragments, create a map of fragment objects
+    to fragment symbols.
+    """
+    newdict = gen_dict_symbol2fragment(fragments)
+    inewdict = invert_map(newdict)
+    return inewdict
+
+
+def gen_term_from_symlist(seq):
+    """
+    Given a sequence of symbols, generate a SymPy Symbol/Mul from them.
+    """
+    # We can't index into sets, so...
+    seq = list(seq)
+    if len(seq) == 1:
+        return seq[0]
+    else:
+        return seq[0] * gen_term_from_symlist(seq[1:])
