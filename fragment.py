@@ -71,6 +71,9 @@ class Fragment(object):
     def __str__(self):
         return self.name
 
+    def __repr__(self):
+        return 'Fragment({})'.format(self.name)
+
     def __add__(self, other):
         return self.combine(other)
 
@@ -141,7 +144,7 @@ def combine_fragment_sequence(f):
         new.atoms += fragment.atoms
         new.coords += fragment.coords
         new.nfragments += fragment.nfragments
-        new.symbol_repr.union(fragment.symbol_repr)
+        new.symbol_repr = new.symbol_repr.union(fragment.symbol_repr)
     # assume that all fragments we're combining live in the same directory
     new.fxyz = os.path.join(os.path.dirname(f[0].fxyz), new.name + ".xyz")
     return new
@@ -166,7 +169,7 @@ def generate_fragment_objects(filename):
         fragment.name = sntemp.format(fid)
         fragment.comment = comments[fid]
         fragment.charge = frag_charges[fid]
-        fragment.multiplicities = frag_multiplicities[fid]
+        fragment.multiplicity = frag_multiplicities[fid]
         fragment.atoms = atoms[fid]
         fragment.coords = coords[fid]
         fragment.nfragments += 1

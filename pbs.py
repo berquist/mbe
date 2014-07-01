@@ -11,19 +11,21 @@ def submit_fragment_job(fragment):
     """
     fragment.write(fragment.fxyz)
     stub = os.path.splitext(os.path.basename(fragment.fxyz))[0]
-    eprname = os.path.splitext(fragment.fxyz)[0] + ".inp"
-    pbsname = os.path.splitext(fragment.fxyz)[0] + ".pbs"
-    eprhandle = open(eprname, "w")
-    pbshandle = open(pbsname, "w")
-    eprhandle.write(MBE.file_templates.eprfile(fragment.charge,
+    eprname = os.path.splitext(fragment.fxyz)[0] + '.in'
+    pbsname = os.path.splitext(fragment.fxyz)[0] + '.pbs'
+    eprhandle = open(eprname, 'w')
+    pbshandle = open(pbsname, 'w')
+    eprhandle.write(mbe.file_templates.eprfile(fragment.charge,
                                                fragment.multiplicity,
                                                stub))
-    pbshandle.write(MBE.file_templates.pbsfile(stub))
+    pbshandle.write(mbe.file_templates.pbsfile(stub))
     eprhandle.close()
     pbshandle.close()
     os.chdir(os.path.dirname(pbsname))
-    subprocess.call(["qsub", pbsname])
-    eproutname = os.path.splitext(eprname)[0] + ".out"
+    # subprocess.call(['qsub', pbsname])
+    eproutname = os.path.splitext(eprname)[0] + '.out'
+    # This call is here only for debugging purposes.
+    subprocess.check_call(' '.join(['orca', eprname, '|', 'tee', eproutname]), shell=True)
     orcafile = orca_parser.ORCAOutputParser(eproutname)
     return orcafile
 

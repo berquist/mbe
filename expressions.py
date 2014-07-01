@@ -35,9 +35,9 @@ def MBEn(f, n):
 if __name__ == '__main__':
     from sympy import symbols
 
-    f2 = list(symbols('frag0:2'))
-    f3 = list(symbols('frag0:3'))
-    f4 = list(symbols('frag0:4'))
-    f5 = list(symbols('frag0:5'))
-    f6 = list(symbols('frag0:6'))
-    f7 = list(symbols('frag0:7'))
+    f2 = list(symbols('f0:2'))
+    f3 = list(symbols('f0:3'))
+    f4 = list(symbols('f0:4'))
+    f5 = list(symbols('f0:5'))
+    f6 = list(symbols('f0:6'))
+    f7 = list(symbols('f0:7'))

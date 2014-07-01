@@ -1,5 +1,5 @@
 """mbe.expressions_explicit: Explicit formulation of formulas in
-mbe.expressions for some low orders."""
+mbe.expressions for some low orders. Useful for testing."""
 
 from sympy import prod
 from itertools import combinations

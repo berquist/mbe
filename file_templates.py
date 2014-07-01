@@ -5,13 +5,13 @@ def eprfile(charge, multiplicity, xyzfile):
     """
     A default template for an EPR input file.
     """
-    return """! uks pbe0 def2-tzvpp def2-tzvpp/jk ri rijk pmodel somf(1x) noautostart tightscf grid5
+    return """! uks pbe0 def2-sv(p) def2-svp/jk ri rijk pmodel somf(1x) noautostart tightscf grid5
 
 %pal
  nprocs 1
  end
 
-* xyzfile {0} {1} {2}.xyz *
+* xyzfile {charge} {multiplicity} {xyzfile}.xyz *
 
 %eprnmr
  tol 1e-10
@@ -20,7 +20,7 @@ def eprfile(charge, multiplicity, xyzfile):
  printlevel 5
  end
 
-""".format(charge, multiplicity, xyzfile)
+""".format(charge=charge, multiplicity=multiplicity, xyzfile=xyzfile)
 
 
 def pbsfile(xyzfile):
@@ -29,7 +29,7 @@ def pbsfile(xyzfile):
     """
     return """#!/bin/bash
 
-#PBS -N {0}
+#PBS -N {xyzfile}
 #PBS -q shared
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=144:00:00
@@ -43,8 +43,8 @@ module load intel/2013.0
 module load openmpi/1.6.5-intel12
 module load orca/3.0.1
 
-cp $PBS_O_WORKDIR/{0}.inp $LOCAL
-cp $PBS_O_WORKDIR/{0}.xyz $LOCAL
+cp $PBS_O_WORKDIR/{xyzfile}.in $LOCAL
+cp $PBS_O_WORKDIR/{xyzfile}.xyz $LOCAL
 cd $LOCAL
 
 run_on_exit() {{
@@ -54,5 +54,5 @@ run_on_exit() {{
 
 trap run_on_exit EXIT
 
-$(which orca) {0}.inp >& $PBS_O_WORKDIR/{0}.out
-""".format(xyzfile)
+$(which orca) {xyzfile}.in >& $PBS_O_WORKDIR/{xyzfile}.out
+""".format(xyzfile=xyzfile)
