@@ -1,6 +1,9 @@
 """mbe.epr: Functions useful specifically for EPR calculations.
 """
 
+import numpy as np
+import scipy as sp
+
 import mbe
 from mbe.fragment import generate_fragment_from_term
 
@@ -29,3 +32,18 @@ def remove_inactive_terms(expr, fragments):
         coeff = terms[term]
         new_expr += (coeff * term)
     return new_expr
+
+def calculate_gtensor(expr, map_frag_results):
+    """
+    ...
+    """
+    tot_gmat = 0
+    map_symbols_frag = mbe.utils.gen_dict_symbol2fragment(map_frag_results.keys())
+    exact_term_tuples = expr.as_terms()[0]
+    for exact_term in exact_term_tuples:
+        term = exact_term[0].as_coeff_Mul()
+        coeff, symbol = term
+        gmat = map_frag_results[map_symbols_frag[symbol]].molecule.gtensor.gmatrix
+        tot_gmat += (coeff * gmat)
+    tot_gmat = np.sqrt(sp.linalg.eigvals(np.dot(tot_gmat.T, tot_gmat)).real)
+    return tot_gmat

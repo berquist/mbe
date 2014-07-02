@@ -35,7 +35,7 @@ def gen_dict_symbol2fragment(fragments):
     """
     newdict = dict()
     for fragment in fragments:
-        newdict[next(iter(fragment.symbol_repr))] = fragment
+        newdict[gen_term_from_symlist(fragment.symbol_repr)] = fragment
     return newdict
 
 

@@ -4,8 +4,9 @@ functions."""
 import os
 import sympy
 
+import mbe
 from mbe.xyz_operations import read_fragment_xyz
-from mbe.utils import gen_term_from_symlist
+
 
 class Fragment(object):
     """
@@ -180,7 +181,7 @@ def generate_fragment_objects(filename):
     return fragments
 
 
-def generate_fragment_from_term(term, termdict):
+def generate_fragment_from_term(term, fragmap):
     """
     Given a SymPy term (part of an expression) and a map from symbols
     to fragments, generate the fragment corresponding to the term.
@@ -188,7 +189,7 @@ def generate_fragment_from_term(term, termdict):
     atoms = term.atoms()
     union = list()
     for atom in atoms:
-        union.append(termdict[atom])
+        union.append(fragmap[atom])
     fragment = combine_fragment_sequence(union)
     return fragment
 
@@ -199,4 +200,24 @@ def generate_term_from_fragment(fragment):
     (either a Symbol or a Mul).
     """
     symbol_repr = list(fragment.symbol_repr)
-    return gen_term_from_symlist(symbol_repr)
+    return mbe.utils.gen_term_from_symlist(symbol_repr)
+
+
+def generate_fragments_from_expr(expr, monomers):
+    """
+    Given a full SymPy expression (multiple terms) and a sequence of monomers,
+    generate a list of the proper fragments (without coefficients).
+    """
+    # The term dict maps the symbolic representation of fragments (with their
+    # union shown as multiplication) to their coefficient in the final expression.
+    fragmap = mbe.utils.gen_dict_symbol2fragment(monomers)
+    termdict = dict(expr.as_coefficients_dict())
+    fragments = []
+    for term in termdict:
+        fragment = generate_fragment_from_term(term, fragmap)
+        fragments.append(fragment)
+    return fragments
+
+
+def generate_expr_from_fragments(fragments):
+    pass
