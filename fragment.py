@@ -9,8 +9,7 @@ from mbe.xyz_operations import read_fragment_xyz
 
 
 class Fragment(object):
-    """
-    A fragment is a molecule that can be combined with another
+    """A fragment is a molecule that can be combined with another
     fragment.
     """
     def __init__(self):
@@ -26,9 +25,8 @@ class Fragment(object):
         self.symbol_repr = set()
 
     def is_active(self):
-        """
-        Is this fragment going to be EPR-active? Determine based
-        on the multiplicity.
+        """Is this fragment going to be EPR-active? Determine based on the
+        multiplicity.
         """
         if self.multiplicity == 1:
             return False
@@ -38,8 +36,7 @@ class Fragment(object):
             raise Exception('Only singlets and doublets are allowed.')
 
     def read(self, fxyz):
-        """
-        Load the charge, multiplicity, and coordinates into the fragment.
+        """Load the charge, multiplicity, and coordinates into the fragment.
         """
         self.fxyz = fxyz
         self.name = os.path.splitext(os.path.basename(fxyz))[0]
@@ -58,8 +55,7 @@ class Fragment(object):
         self.symbol_repr = set(sympy.S(self.name))
 
     def write(self, fxyz):
-        """
-        Write an XYZ file to disk, with the charge and multiplicity stored
+        """Write an XYZ file to disk, with the charge and multiplicity stored
         in the comment line.
         """
         satemp = "{:3s} {:12.7f} {:12.7f} {:12.7f}\n"
@@ -70,7 +66,7 @@ class Fragment(object):
                 xyzhandle.write(satemp.format(atom, *coords))
 
     def __str__(self):
-        return self.name
+        return self.__repr__()
 
     def __repr__(self):
         return 'Fragment({})'.format(self.name)
@@ -79,8 +75,8 @@ class Fragment(object):
         return self.combine(other)
 
     def combine(self, other):
-        """
-        Combine this fragment with another fragment, returning a new fragment.
+        """Combine this fragment with another fragment, returning a new
+        fragment.
         """
         new = Fragment()
         new.name = other.name + self.name
