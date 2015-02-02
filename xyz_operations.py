@@ -3,6 +3,8 @@
 
 from __future__ import print_function
 
+import os.path
+
 import mbe
 
 
@@ -12,7 +14,7 @@ def read_xyz(filename):
     """
     atoms = []
     coords = []
-    with open(filename, 'r') as xyzfile:
+    with open(filename) as xyzfile:
         natoms = int(xyzfile.readline().strip())
         comment = xyzfile.readline().strip()
         for line in xyzfile:
@@ -35,7 +37,7 @@ def read_fragment_xyz(filename):
     frag_atoms = []
     frag_coords = []
     atom_count = 0
-    with open(filename, 'r') as fragfile:
+    with open(filename) as fragfile:
         # the very first line is the system's total charge and multiplicity
         sys_charge, sys_multiplicity \
             = list(map(int, fragfile.readline().split()))
@@ -92,6 +94,7 @@ def write_fragment_xyz(fragments):
             blocks.append(satemp.format(atomsym, *atomcoords))
     print('\n'.join(blocks))
 
+
 def write_individual_fragments(filename):
     """Read a combined fragment XYZ file, split it up into individual
     fragment XYZ files, and write them to disk.
@@ -132,14 +135,21 @@ def write_full_system(filename):
                 xyzfile.write(satemp.format(atoms[fid][atom],
                                             *coords[fid][atom]))
 
-if __name__ == '__main__':
-    import os
+def main():
+    """If this file is called as a script, read in a fragment-style input
+    file, and write the monomers and supersystem to disk as XYZ files.
+    """
+
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('fraginpfile')
+    parser.add_argument('fraginpfile', help='name of the fragment-style input file')
     args = parser.parse_args()
     fraginpfile = args.fraginpfile
 
     write_individual_fragments(fraginpfile)
     write_full_system(fraginpfile)
+
+
+if __name__ == '__main__':
+    main()

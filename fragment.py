@@ -40,7 +40,7 @@ class Fragment(object):
         """
         self.fxyz = fxyz
         self.name = os.path.splitext(os.path.basename(fxyz))[0]
-        xyzhandle = open(fxyz, "r")
+        xyzhandle = open(fxyz)
         xyzhandle.readline()
         self.charge, self.multiplicity \
             = list(map(int, xyzhandle.readline().split()))

@@ -32,7 +32,10 @@ def MBEn(f, n):
     else:
         return En(f, n) + MBEn(f, n - 1)
 
-if __name__ == '__main__':
+
+def main():
+    """If this file is run as a script, ... (does nothing right now)"""
+
     from sympy import symbols
 
     f2 = list(symbols('f0:2'))
@@ -41,3 +44,7 @@ if __name__ == '__main__':
     f5 = list(symbols('f0:5'))
     f6 = list(symbols('f0:6'))
     f7 = list(symbols('f0:7'))
+
+
+if __name__ == '__main__':
+    main()
