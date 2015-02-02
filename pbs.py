@@ -5,8 +5,11 @@ import os
 import subprocess
 
 import mbe
-import orca_parser
 
+try:
+    import orcaparse
+except ImportError:
+    pass
 
 def submit_fragment_job(fragment):
     """Run an ORCA calculation on the given fragment through PBS.
