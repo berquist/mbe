@@ -54,16 +54,24 @@ class Fragment(object):
         self.active = self.is_active()
         self.symbol_repr = set(sympy.S(self.name))
 
+    def xyz(self):
+        """Form the XYZ file representation, without the number of atoms or
+        the comment.
+        """
+        xyz_repr = []
+        satemp = "{:3s} {:12.7f} {:12.7f} {:12.7f}\n"
+        for atom, coords in zip(self.atoms, self.coords):
+            xyz_repr.append(satemp.format(atom, *coords))
+        return "".join(xyz_repr).rstrip('\n')
+
     def write(self, fxyz):
         """Write an XYZ file to disk, with the charge and multiplicity stored
         in the comment line.
         """
-        satemp = "{:3s} {:12.7f} {:12.7f} {:12.7f}\n"
         with open(fxyz, "w") as xyzhandle:
             xyzhandle.write(str(len(self.atoms)) + "\n")
             xyzhandle.write(self.comment + "\n")
-            for atom, coords in zip(self.atoms, self.coords):
-                xyzhandle.write(satemp.format(atom, *coords))
+            xyzhandle.write(self.xyz())
 
     def __str__(self):
         return self.__repr__()
@@ -79,19 +87,19 @@ class Fragment(object):
         fragment.
         """
         new = Fragment()
-        new.name = other.name + self.name
+        new.name = self.name + other.name
         new.fxyz = os.path.join(os.path.dirname(self.fxyz), new.name + ".xyz")
-        new.comment = other.comment + " :: " + self.comment
-        new.charge = other.charge + self.charge
+        new.comment = self.comment + " :: " + other.comment
+        new.charge = self.charge + other.charge
         if other.multiplicity == self.multiplicity:
             new.multiplicity = 1
         else:
             new.multiplicity = 2
-        new.atoms = other.atoms + self.atoms
-        new.coords = other.coords + self.coords
-        new.nfragments = other.nfragments + self.nfragments
-        new.active = other.active ^ self.active
-        new.symbol_repr = set.union(other.symbol_repr, self.symbol_repr)
+        new.atoms = self.atoms + other.atoms
+        new.coords = self.coords + other.coords
+        new.nfragments = self.nfragments + other.nfragments
+        new.active = self.active ^ other.active
+        new.symbol_repr = set.union(self.symbol_repr, other.symbol_repr)
         return new
 
     def combine_write(self, other, fxyz):
@@ -147,6 +155,18 @@ def combine_fragment_sequence(f):
     return new
 
 
+def _normalize_name(name):
+    """Replace all non-alphanumeric symbols by underscores."""
+    newname = []
+    for c in name:
+        cl = c.lower()
+        if (cl >= 'a' and cl <= 'z') or (cl >= '0' and cl <= '9'):
+            newname.append(c)
+        else:
+            newname.append('_')
+    return ''.join(newname)
+
+
 def generate_fragment_objects(filename):
     """
     Generate a list of Fragment() objects given a fragment-style
@@ -162,8 +182,8 @@ def generate_fragment_objects(filename):
     n = len(frag_charges)
     for fid in range(n):
         fragment = Fragment()
-        fragment.fxyz = sftemp.format(fid)
-        fragment.name = sntemp.format(fid)
+        fragment.fxyz = _normalize_name(sftemp.format(fid))
+        fragment.name = _normalize_name(sntemp.format(fid))
         fragment.comment = comments[fid]
         fragment.charge = frag_charges[fid]
         fragment.multiplicity = frag_multiplicities[fid]
