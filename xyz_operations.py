@@ -1,10 +1,14 @@
 """mbe.xyz_operations: Functions for dealing with XYZ (*.xyz) files.
 (reading, writing, etc.)"""
 
+from __future__ import print_function
+
+import mbe
+
+
 def read_xyz(filename):
-    """
-    A simple example for reading from an XYZ file line by line, not all at once
-    using readlines().
+    """A simple example for reading from an XYZ file line by line, not
+    all at once using readlines().
     """
     atoms = []
     coords = []
@@ -20,9 +24,8 @@ def read_xyz(filename):
 
 
 def read_fragment_xyz(filename):
-    """
-    A more complicated example, reading an XYZ file divided into fragments,
-    again doing so incrementally.
+    """A more complicated example, reading an XYZ file divided into
+    fragments, again doing so incrementally.
     """
     comments = []
     frag_charges = []
@@ -72,10 +75,26 @@ def read_fragment_xyz(filename):
             atoms, coords, comments, atom_count)
 
 
-def write_individual_fragments(filename):
+def write_fragment_xyz(fragments):
+    """From an iterable of Fragment()s, write a fragment file to disk that
+    can either be read by these scripts or used as a Q-Chem input.
     """
-    Read a combined fragment XYZ file, split it up into individual fragment XYZ
-    files, and write them to disk.
+    # Make a supersystem fragment so that we can get the total charge
+    # and multiplicity.
+    superfrag = mbe.fragment.combine_fragment_sequence(fragments)
+    blocks = []
+    blocks.append('{} {}'.format(superfrag.charge, superfrag.multiplicity))
+    satemp = '{:3} {:12.7f} {:12.7f} {:12.7f}'
+    for fragment in fragments:
+        blocks.append('-- {}'.format(fragment.comment))
+        blocks.append('{} {}'.format(fragment.charge, fragment.multiplicity))
+        for atomsym, atomcoords in zip(fragment.atoms, fragment.coords):
+            blocks.append(satemp.format(atomsym, *atomcoords))
+    print('\n'.join(blocks))
+
+def write_individual_fragments(filename):
+    """Read a combined fragment XYZ file, split it up into individual
+    fragment XYZ files, and write them to disk.
     """
     sys_charge, sys_multiplicity, frag_charges, frag_multiplicities, \
         atoms, coords, comments, atom_count = read_fragment_xyz(filename)
@@ -98,9 +117,8 @@ def write_individual_fragments(filename):
 
 
 def write_full_system(filename):
-    """
-    Read a combined fragment XYZ file and write a normal XYZ file of the
-    full system.
+    """Read a combined fragment XYZ file and write a normal XYZ file of
+    the full system.
     """
     sys_charge, sys_multiplicity, frag_charges, frag_multiplicities, \
         atoms, coords, comments, atom_count = read_fragment_xyz(filename)
