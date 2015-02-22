@@ -77,7 +77,7 @@ def read_fragment_xyz(filename):
             atoms, coords, comments, atom_count)
 
 
-def write_fragment_xyz(fragments):
+def write_fragment_xyz(fragments, filename=None):
     """From an iterable of Fragment()s, write a fragment file to disk that
     can either be read by these scripts or used as a Q-Chem input.
     """
@@ -86,13 +86,17 @@ def write_fragment_xyz(fragments):
     superfrag = mbe.fragment.combine_fragment_sequence(fragments)
     blocks = []
     blocks.append('{} {}'.format(superfrag.charge, superfrag.multiplicity))
-    satemp = '{:3} {:12.7f} {:12.7f} {:12.7f}'
+    satemp = '{:3} {:15.10f} {:15.10f} {:15.10f}'
     for fragment in fragments:
         blocks.append('-- {}'.format(fragment.comment))
         blocks.append('{} {}'.format(fragment.charge, fragment.multiplicity))
         for atomsym, atomcoords in zip(fragment.atoms, fragment.coords):
             blocks.append(satemp.format(atomsym, *atomcoords))
-    print('\n'.join(blocks))
+    if filename is None:
+        print('\n'.join(blocks))
+    else:
+        with open(filename, 'w') as outfile:
+            print('\n'.join(blocks), file=outfile)
 
 
 def write_individual_fragments(filename):
@@ -106,7 +110,7 @@ def write_individual_fragments(filename):
     # string templates
     sftemp = os.path.splitext(filename)[0] + '_F{}.xyz'
     sctemp = '{} {} {}\n'
-    satemp = '{:3} {:12.7f} {:12.7f} {:12.7f}\n'
+    satemp = '{:3} {:15.10f} {:15.10f} {:15.10f}\n'
     # generate a single XYZ file for each fragment
     for fid in range(nfragments):
         with open(sftemp.format(fid), 'w') as xyzfile:
@@ -127,7 +131,7 @@ def write_full_system(filename):
         atoms, coords, comments, atom_count = read_fragment_xyz(filename)
     nfragments = len(frag_charges)
     sftemp = os.path.splitext(filename)[0] + '_FULL.xyz'
-    satemp = '{:3} {:12.7f} {:12.7f} {:12.7f}\n'
+    satemp = '{:3} {:15.10f} {:15.10f} {:15.10f}\n'
     with open(sftemp, 'w') as xyzfile:
         xyzfile.write('{}\n\n'.format(atom_count))
         for fid in range(nfragments):

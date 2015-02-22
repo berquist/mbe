@@ -14,7 +14,11 @@ setup(
     author_email='erb74@pitt.edu',
     url='github or bitbucket',
     packages=['mbe'],
-    install_requires=['six'],
+    install_requires=[
+        'argparse',
+        'numpy',
+        'sympy',
+    ],
     classifiers=[
     ],
 )
