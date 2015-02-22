@@ -11,6 +11,27 @@ try:
 except ImportError:
     pass
 
+
+def read_nodefile(path):
+    """Given the nodefile path, read the nodefile and return a list of
+    strings, where each string is a hostname.
+    """
+    with open(path) as handle:
+        lines = handle.read()
+    return lines.splitlines()[:-1]
+
+
+def make_nodefile_map_nodes_to_cores(nodefile_list):
+    """"""
+    nodefile_map = dict()
+    for node in nodefile_list:
+        if node in nodefile_map.keys():
+            nodefile_map[node] += 1
+        else:
+            nodefile_map[node] = 1
+    return nodefile_map
+
+
 def submit_fragment_job(fragment):
     """Run an ORCA calculation on the given fragment through PBS.
     """

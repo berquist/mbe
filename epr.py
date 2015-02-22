@@ -2,7 +2,6 @@
 """
 
 import numpy as np
-import scipy as sp
 
 import mbe
 from mbe.fragment import generate_fragment_from_term
@@ -45,5 +44,5 @@ def calculate_gtensor(expr, map_frag_results):
         coeff, symbol = term
         gmat = map_frag_results[map_symbols_frag[symbol]].molecule.gtensor.gmatrix
         tot_gmat += (coeff * gmat)
-    tot_gmat = np.sqrt(sp.linalg.eigvals(np.dot(tot_gmat.T, tot_gmat)).real)
+    tot_gmat = np.sqrt(np.linalg.eigvals(np.dot(tot_gmat.T, tot_gmat)).real)
     return tot_gmat
