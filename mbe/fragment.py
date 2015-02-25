@@ -4,6 +4,8 @@ functions."""
 import os
 import sympy
 
+from toolz import frequencies
+
 import mbe
 from mbe.xyz_operations import read_fragment_xyz
 
@@ -12,6 +14,7 @@ class Fragment(object):
     """A fragment is a molecule that can be combined with another
     fragment.
     """
+
     def __init__(self):
         self.fxyz = ""
         self.name = ""
@@ -24,10 +27,35 @@ class Fragment(object):
         self.active = False
         self.symbol_repr = set()
 
+    def _make_formula_dict(self):
+        """From the list of atoms, form a dictionary where the keys are the
+        element symbols and the values are the number of atoms of that
+        element.
+        """
+
+        return frequencies(self.atoms)
+
+    def _make_canonical_formula_string(self):
+        """From the formula dictionary, return the canonical formula as a
+        string.
+        """
+
+        if not hasattr(self, 'formula'):
+            self.formula = self._make_formula_dict()
+        pieces = sorted(self.formula.items(), key=lambda x: x[0])
+        strpieces = []
+        for piece in pieces:
+            if piece[1] == 1:
+                strpieces.append(piece[0])
+            else:
+                strpieces.append('{}{}'.format(*piece))
+        return ''.join(strpieces)
+
     def is_active(self):
         """Is this fragment going to be EPR-active? Determine based on the
         multiplicity.
         """
+
         if self.multiplicity == 1:
             return False
         elif self.multiplicity == 2:
@@ -38,6 +66,7 @@ class Fragment(object):
     def read(self, fxyz):
         """Load the charge, multiplicity, and coordinates into the fragment.
         """
+
         self.fxyz = fxyz
         self.name = os.path.splitext(os.path.basename(fxyz))[0]
         xyzhandle = open(fxyz)
@@ -53,11 +82,13 @@ class Fragment(object):
         self.nfragments += 1
         self.active = self.is_active()
         self.symbol_repr = set(sympy.S(self.name))
+        self.formula_string = self._make_canonical_formula_string()
 
     def xyz(self):
         """Form the XYZ file representation, without the number of atoms or
         the comment.
         """
+
         xyz_repr = []
         satemp = "{:3s} {:12.7f} {:12.7f} {:12.7f}\n"
         for atom, coords in zip(self.atoms, self.coords):
@@ -68,6 +99,7 @@ class Fragment(object):
         """Write an XYZ file to disk, with the charge and multiplicity stored
         in the comment line.
         """
+
         with open(fxyz, "w") as xyzhandle:
             xyzhandle.write(str(len(self.atoms)) + "\n")
             xyzhandle.write(self.comment + "\n")
@@ -86,6 +118,7 @@ class Fragment(object):
         """Combine this fragment with another fragment, returning a new
         fragment.
         """
+
         new = Fragment()
         new.name = self.name + other.name
         new.fxyz = os.path.join(os.path.dirname(self.fxyz), new.name + ".xyz")
@@ -100,22 +133,24 @@ class Fragment(object):
         new.nfragments = self.nfragments + other.nfragments
         new.active = self.active ^ other.active
         new.symbol_repr = set.union(self.symbol_repr, other.symbol_repr)
+        new.formula_string = new._make_canonical_formula_string()
+
         return new
 
     def combine_write(self, other, fxyz):
+        """Combine this fragment with another fragment, returning a new
+        fragment and writing it to disk.
         """
-        Combine this fragment with another fragment, returning a new fragment
-        and writing it to disk.
-        """
+
         new = self.combine(other)
         new.write(fxyz)
         return new
 
 
 def combine_two_fragments(x, y):
+    """Combine two fragments into one, returning a new fragment.
     """
-    Combine two fragments into one, returning a new fragment.
-    """
+
     new = Fragment()
     new.name = x.name + y.name
     new.fxyz = os.path.join(os.path.dirname(x.fxyz), new.name + ".xyz")
@@ -130,13 +165,14 @@ def combine_two_fragments(x, y):
     new.nfragments = x.nfragments + y.nfragments
     new.active = x.active ^ y.active
     new.symbol_repr = set.union(x.symbol_repr, y.symbol_repr)
+    new.formula_string = new._make_canonical_formula_string()
     return new
 
 
 def combine_fragment_sequence(f):
+    """Combine multiple fragments into one, returning a new fragment.
     """
-    Combine multiple fragments into one, returning a new fragment.
-    """
+
     new = Fragment()
     for fragment in f:
         new.name += fragment.name
@@ -150,6 +186,7 @@ def combine_fragment_sequence(f):
         new.coords += fragment.coords
         new.nfragments += fragment.nfragments
         new.symbol_repr = new.symbol_repr.union(fragment.symbol_repr)
+        new.formula_string = new._make_canonical_formula_string()
     # assume that all fragments we're combining live in the same directory
     new.fxyz = os.path.join(os.path.dirname(f[0].fxyz), new.name + ".xyz")
     return new
@@ -157,6 +194,7 @@ def combine_fragment_sequence(f):
 
 def _normalize_name(name):
     """Replace all non-alphanumeric symbols by underscores."""
+
     newname = []
     for c in name:
         cl = c.lower()
@@ -168,10 +206,10 @@ def _normalize_name(name):
 
 
 def generate_fragment_objects(filename):
+    """Generate a list of Fragment() objects given a fragment-style XYZ
+    file (Q-Chem, Psi).
     """
-    Generate a list of Fragment() objects given a fragment-style
-    XYZ file (Q-Chem, Psi4).
-    """
+
     sys_charge, sys_multiplicity, frag_charges, frag_multiplicities, \
         atoms, coords, comments, atom_count = read_fragment_xyz(filename)
 
@@ -192,16 +230,17 @@ def generate_fragment_objects(filename):
         fragment.nfragments += 1
         fragment.active = fragment.is_active()
         fragment.symbol_repr.add(sympy.S(fragment.name))
+        fragment.formula_string = fragment._make_canonical_formula_string()
         fragments.append(fragment)
 
     return fragments
 
 
 def generate_fragment_from_term(term, fragmap):
-    """
-    Given a SymPy term (part of an expression) and a map from symbols
+    """Given a SymPy term (part of an expression) and a map from symbols
     to fragments, generate the fragment corresponding to the term.
     """
+
     atoms = term.atoms()
     union = list()
     for atom in atoms:
@@ -211,19 +250,20 @@ def generate_fragment_from_term(term, fragmap):
 
 
 def generate_term_from_fragment(fragment):
-    """
-    Given a fragment object, generate a SymPy term corresponding to it
+    """Given a fragment object, generate a SymPy term corresponding to it
     (either a Symbol or a Mul).
     """
+
     symbol_repr = list(fragment.symbol_repr)
     return mbe.utils.gen_term_from_symlist(symbol_repr)
 
 
 def generate_fragments_from_expr(expr, monomers):
+    """Given a full SymPy expression (multiple terms) and a sequence of
+    monomers, generate a list of the proper fragments (without
+    coefficients).
     """
-    Given a full SymPy expression (multiple terms) and a sequence of monomers,
-    generate a list of the proper fragments (without coefficients).
-    """
+
     # The term dict maps the symbolic representation of fragments (with their
     # union shown as multiplication) to their coefficient in the final expression.
     fragmap = mbe.utils.gen_dict_symbol2fragment(monomers)

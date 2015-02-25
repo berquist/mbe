@@ -1,5 +1,6 @@
 """mbe.file_templates: (Default) file templates for dealing with PBS,
-ORCA, and Q-Chem."""
+ORCA, Q-Chem, and Psi."""
+
 
 def eprfile(charge, multiplicity, xyzfile):
     """
@@ -30,7 +31,7 @@ def pbsfile(xyzfile):
     return """#!/bin/bash
 
 #PBS -N {xyzfile}
-#PBS -q shared
+#PBS -q shared_large
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=144:00:00
 #PBS -j oe
@@ -39,9 +40,7 @@ def pbsfile(xyzfile):
 #PBS -M erb74@pitt.edu
 
 module purge
-module load intel/2013.0
-module load openmpi/1.6.5-intel12
-module load orca/3.0.1
+module load orca/3.0.3
 
 cp $PBS_O_WORKDIR/{xyzfile}.in $LOCAL
 cp $PBS_O_WORKDIR/{xyzfile}.xyz $LOCAL

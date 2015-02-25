@@ -19,7 +19,7 @@ args = parser.parse_args()
 submit = args.submit
 
 # load the fragment input file
-filename = os.path.join(os.environ['PWD'], 'example.xyz')
+filename = os.path.join(os.environ['PWD'], 'example_epr_ecoRI.xyz')
 
 # generate the fragment (monomer) objects from the input
 monomers = mbe.fragment.generate_fragment_objects(filename)

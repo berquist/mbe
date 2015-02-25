@@ -1,5 +1,5 @@
-"""mbe: For performing many-body expansions (especially EPR g-tensor)
-using ORCA."""
+"""mbe: Tools for performing many-body expansions using computational
+chemistry packages."""
 
 from . import epr
 from . import expressions

@@ -1,5 +1,5 @@
 """mbe.pbs: Functions for submitting calculations to the Portable
-Batch Scheduler job scheduling system."""
+Batch Scheduler (PBS) job scheduling system."""
 
 import os
 import subprocess

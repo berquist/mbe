@@ -1,8 +1,8 @@
 """mbe.utils: Utility functions that don't fit anywhere else."""
 
+
 def term2str(term):
-    """
-    Convert a term (sympy.core.mul.Mul) into its string representation
+    """Convert a term (sympy.core.mul.Mul) into its string representation
     by splitting and joining at each multiplication.
     """
     s = str(term).replace('*', '')
@@ -10,9 +10,8 @@ def term2str(term):
 
 
 def gen_dict_term2str(termdict):
-    """
-    Given a dictionary where all the keys are terms, return a new dictionary
-    that maps each term to its custom string form.
+    """Given a dictionary where all the keys are terms, return a new
+    dictionary that maps each term to its custom string form.
     """
     newdict = dict()
     for term in termdict:
@@ -21,17 +20,15 @@ def gen_dict_term2str(termdict):
 
 
 def invert_map(m):
-    """
-    Return the map m, inverted.
+    """Return the map m, inverted.
     """
     im = {v: k for k, v in m.items()}
     return im
 
 
 def gen_dict_symbol2fragment(fragments):
-    """
-    Given a sequence of fragments, create a map of fragment symbols
-    to fragment objects.
+    """Given a sequence of fragments, create a map of fragment symbols to
+    fragment objects.
     """
     newdict = dict()
     for fragment in fragments:
@@ -40,9 +37,8 @@ def gen_dict_symbol2fragment(fragments):
 
 
 def gen_dict_fragment2symbol(fragments):
-    """
-    Given a sequence of fragments, create a map of fragment objects
-    to fragment symbols.
+    """Given a sequence of fragments, create a map of fragment objects to
+    fragment symbols.
     """
     newdict = gen_dict_symbol2fragment(fragments)
     inewdict = invert_map(newdict)
@@ -50,8 +46,8 @@ def gen_dict_fragment2symbol(fragments):
 
 
 def gen_term_from_symlist(seq):
-    """
-    Given a sequence of symbols, generate a SymPy Symbol/Mul from them.
+    """Given a sequence of symbols, generate a SymPy Symbol/Mul from
+    them.
     """
     # We can't index into sets, so...
     seq = list(seq)
@@ -59,3 +55,17 @@ def gen_term_from_symlist(seq):
         return seq[0]
     else:
         return seq[0] * gen_term_from_symlist(seq[1:])
+
+
+def pad_left_zeros(num, maxwidth):
+    """Pad the given number with zeros on the left until the
+    total length is maxwidth, returning it as a string.
+    """
+
+    numwidth = len(str(num))
+    if numwidth < maxwidth:
+        numzeros = maxwidth - numwidth
+        numstr = (numzeros * '0') + str(num)
+    else:
+        numstr = str(num)
+    return numstr

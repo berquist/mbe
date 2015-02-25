@@ -12,4 +12,5 @@ expressions.
 argparse
 numpy
 sympy
+toolz
 ```

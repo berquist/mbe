@@ -77,7 +77,7 @@ def read_fragment_xyz(filename):
             atoms, coords, comments, atom_count)
 
 
-def write_fragment_xyz(fragments, filename=None):
+def write_fragment_section_qchem(fragments, filename=None):
     """From an iterable of Fragment()s, write a fragment file to disk that
     can either be read by these scripts or used as a Q-Chem input.
     """
@@ -92,6 +92,30 @@ def write_fragment_xyz(fragments, filename=None):
         blocks.append('{} {}'.format(fragment.charge, fragment.multiplicity))
         for atomsym, atomcoords in zip(fragment.atoms, fragment.coords):
             blocks.append(satemp.format(atomsym, *atomcoords))
+    if filename is None:
+        print('\n'.join(blocks))
+    else:
+        with open(filename, 'w') as outfile:
+            print('\n'.join(blocks), file=outfile)
+
+
+def write_fragment_section_psi(fragments, filename=None):
+    """From an iterable of Fragment()s, write a fragment file to disk that
+    can be used as a Psi input.
+
+    The primary difference between Psi and Q-Chem fragment inputs is
+    that Psi doesn't explicitly require the charge and multiplicity of
+    the supersystem.
+    """
+    # ...so we don't need to build the supersystem.
+    blocks = []
+    satemp = '{:3} {:15.10f} {:15.10f} {:15.10f}'
+    for fragment in fragments:
+        blocks.append('--')
+        blocks.append('{} {}'.format(fragment.charge, fragment.multiplicity))
+        for atomsym, atomcoords in zip(fragment.atoms, fragment.coords):
+            blocks.append(satemp.format(atomsym, *atomcoords))
+    del blocks[0]
     if filename is None:
         print('\n'.join(blocks))
     else:

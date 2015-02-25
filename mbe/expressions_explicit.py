@@ -4,6 +4,7 @@ mbe.expressions for some low orders. Useful for testing."""
 from sympy import prod
 from itertools import combinations
 
+
 def dE1(i):
     """Generate a single one-body term."""
     return i
