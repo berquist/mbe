@@ -93,7 +93,7 @@ def E7gen(f):
     return sum(dE7gen(*g) for g in combinations(f, 7))
 
 def T1(f):
-    """Generate all possible one-body terms."""
+    """Generate all possible one-body terms, using explicit loops."""
     n = len(f)
     terms = 0
     for i in range(n):
@@ -102,7 +102,7 @@ def T1(f):
 
 
 def T2(f):
-    """Generate all possible two-body terms."""
+    """Generate all possible two-body terms, using explicit loops."""
     n = len(f)
     terms = 0
     for i in range(n):
@@ -112,7 +112,7 @@ def T2(f):
 
 
 def T3(f):
-    """Generate all possible three-body terms."""
+    """Generate all possible three-body terms, using explicit loops."""
     n = len(f)
     terms = 0
     for i in range(n):
@@ -125,12 +125,47 @@ def T3(f):
     return terms
 
 
-def MBE1(f):
-    """Generate the full 1st-order many-body expansion expression."""
+def MBE1_explicit(f):
+    """Generate the full 1st-order many-body expansion expression, using
+    functions containing explicit loops."""
     return T1(f)
-def MBE2(f):
-    """Generate the full 2nd-order many-body expansion expression."""
-    return MBE1(f) + T2(f)
-def MBE3(f):
-    """Generate the full 3rd-order many-body expansion expression."""
-    return MBE2(f) + T3(f)
+def MBE2_explicit(f):
+    """Generate the full 2nd-order many-body expansion expression, using
+    functions containing explicit loops."""
+    return MBE1_explicit(f) + T2(f)
+def MBE3_explicit(f):
+    """Generate the full 3rd-order many-body expansion expression, using
+    functions containing explicit loops."""
+    return MBE2_explicit(f) + T3(f)
+
+def MBE1_itertools(f):
+    return E1(f)
+def MBE2_itertools(f):
+    return MBE1_itertools(f) + E2gen(f)
+def MBE3_itertools(f):
+    return MBE2_itertools(f) + E3gen(f)
+def MBE4_itertools(f):
+    return MBE3_itertools(f) + E4gen(f)
+def MBE5_itertools(f):
+    return MBE4_itertools(f) + E5gen(f)
+def MBE6_itertools(f):
+    return MBE5_itertools(f) + E6gen(f)
+def MBE7_itertools(f):
+    return MBE6_itertools(f) + E7gen(f)
+
+
+def main():
+    """If this file is run as a script, ... (does nothing right now)"""
+
+    from sympy import symbols
+
+    f2 = symbols('a, b')
+    f3 = symbols('a, b, c')
+    f4 = symbols('a, b, c, d')
+    f5 = symbols('a, b, c, d, e')
+    f6 = symbols('a, b, c, d, e, f')
+    f7 = symbols('a, b, c, d, e, f, g')
+
+
+if __name__ == "__main__":
+    main()

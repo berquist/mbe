@@ -12,6 +12,7 @@ from itertools import cycle
 import os
 import os.path
 import numpy as np
+import sympy
 
 try:
     import pybel as pb
@@ -21,7 +22,6 @@ except ImportError:
 
 import mbe
 from mbe.utils import pad_left_zeros
-
 import periodic_table as pt
 
 
@@ -167,15 +167,24 @@ if __name__ == '__main__':
     parser.add_argument('--rename', action='store_true', help="""whether or not to run the rename method (only for the original files)""")
     parser.add_argument('--single', help="""pass a single droplet XYZ file to only operate on that file""")
     parser.add_argument('--path', default='.', help="""the path all of the droplet coordinate files are contained (can be relative or absolute""")
-    parser.add_argument('--write-fragments', action='store_true', help="""Write the new fragments from each droplet to disk as individual XYZ files.""")
     parser.add_argument('--write-fragment-input-qchem', action='store_true', help="""Write the new fragments from each droplet to disk as a single fragment input file (Q-Chem style).""")
     parser.add_argument('--print-fragment-input-qchem', action='store_true', help="""Print the fragment input (Q-Chem style).""")
     parser.add_argument('--write-fragment-input-psi', action='store_true', help="""Write the new fragments from each droplet to disk as a single fragment input file (Psi style).""")
     parser.add_argument('--print-fragment-input-psi', action='store_true', help="""Print the fragment input (Psi style).""")
+    parser.add_argument('--mbe-order', type=int, default=0, help="""Order of the many-body expansion to go up to.""")
 
     args = parser.parse_args()
 
-    # logger = logging.
+    if args.debug:
+        args.verbose = True
+
+    if args.verbose:
+        level = logging.INFO
+    if args.debug:
+        level = logging.DEBUG
+    else:
+        level = logging.WARNING
+    logging.basicConfig(level=level)
 
     # If we want to rename all the files, be safe and don't try any
     # other operations.
@@ -191,8 +200,8 @@ if __name__ == '__main__':
     if args.debug:
         print(filenames)
 
-    obconv = ob.OBConversion()
-    obconv.SetInAndOutFormats('xyz', 'xyz')
+    # obconv = ob.OBConversion()
+    # obconv.SetInAndOutFormats('xyz', 'xyz')
 
     # These are the total charges for the each of the ionic liquid
     # components.
@@ -238,7 +247,8 @@ if __name__ == '__main__':
         # Read in the entire XYZ file before breaking it apart into fragments.
         natoms, comment, atoms, coords = mbe.xyz_operations.read_xyz(filename)
 
-        print(basename, natoms)
+        if args.verbose:
+            print(basename, natoms)
 
         fragments = []
 
@@ -253,9 +263,26 @@ if __name__ == '__main__':
             fragment.charge = map_charges[fragment.formula_string]
             fragment.nfragments = 1
             fragment.comment = ' '.join([fragment.formula_string, '({})'.format(i)])
-            fragment.name = fragment.comment
-            print(fragment)
+            fragment.name = 'f{}'.format(i)
+            fragment.symbol_repr = {sympy.S(fragment.name)}
+            if args.verbose:
+                print(fragment)
+            if args.debug:
+                print(fragment.symbol_repr)
             fragments.append(fragment)
+
+        if args.mbe_order > 0:
+            monomer_symbols = []
+            for monomer in fragments:
+                for symbol in monomer.symbol_repr:
+                    monomer_symbols.append(symbol)
+            if args.debug:
+                print('Symbolic representation of monomers:')
+                print(monomer_symbols)
+            mbe_expression = mbe.expressions.MBEn(monomer_symbols, args.mbe_order)
+            if args.debug:
+                print('Full MBE{} expression:'.format(args.mbe_order))
+                print(mbe_expression)
 
         if args.write_fragment_input_qchem:
             mbe.xyz_operations.write_fragment_section_qchem(fragments, filename='frag_{}'.format(os.path.basename(filename)))
