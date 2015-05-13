@@ -200,6 +200,11 @@ def get_n_closest_cations(n):
     pass
 
 
+def get_n_closest_fragments(n):
+    """"""
+    pass
+
+
 def get_n_closest_pairs(n):
     """"""
     pass
@@ -212,34 +217,88 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--verbose', action='store_true',
+    parser.add_argument('--verbose',
+                        action='store_true',
                         help="""Print more information to stdout.""")
-    parser.add_argument('--debug', action='store_true',
+    parser.add_argument('--debug',
+                        action='store_true',
                         help="""Print debug-level information to stdout.""")
-    parser.add_argument('--rename-old', action='store_true',
+
+    parser.add_argument('--rename-old',
+                        action='store_true',
                         help="""whether or not to run the rename method on the \
                         old set of droplet XYZ files (only for the original files!)""")
-    parser.add_argument('--rename-new', action='store_true',
+    parser.add_argument('--rename-new',
+                        action='store_true',
                         help="""whether or not to run the rename method on the \
                         new set of droplet XYZ files (only for the original files!)""")
+
     parser.add_argument('--single',
                         help="""pass a single droplet XYZ file to only \
                         operate on that file""")
-    parser.add_argument('--path', default='.',
+    parser.add_argument('--path',
+                        default='.',
                         help="""the path all of the droplet coordinate files \
                         are contained (can be relative or absolute)""")
-    parser.add_argument('--write-fragment-input-qchem', action='store_true',
+
+    parser.add_argument('--write-fragment-input-qchem',
+                        action='store_true',
                         help="""Write the new fragments from each droplet to \
                         disk as a single fragment input file (Q-Chem style).""")
-    parser.add_argument('--print-fragment-input-qchem', action='store_true',
+    parser.add_argument('--print-fragment-input-qchem',
+                        action='store_true',
                         help="""Print the fragment input (Q-Chem style).""")
-    parser.add_argument('--write-fragment-input-psi', action='store_true',
+    parser.add_argument('--write-fragment-input-psi',
+                        action='store_true',
                         help="""Write the new fragments from each droplet to \
                         disk as a single fragment input file (Psi style).""")
-    parser.add_argument('--print-fragment-input-psi', action='store_true',
+    parser.add_argument('--print-fragment-input-psi',
+                        action='store_true',
                         help="""Print the fragment input (Psi style).""")
-    parser.add_argument('--mbe-order', type=int, default=0,
+
+    parser.add_argument('--mbe-order',
+                        type=int,
+                        default=0,
                         help="""Order of the many-body expansion to go up to.""")
+
+    parser.add_argument('--point-charge-type',
+                        choices=('mulliken', 'lowdin', 'chelpg', 'hirshfeld'),
+                        default='mulliken',
+                        help="""The type of point charges to extract from \
+                        an output file.""")
+    parser.add_argument('--point-charge-output-cation',
+                        help="""An output file containing point charges \
+                        that will be applied to every cation.""")
+    parser.add_argument('--point-charge-output-anion',
+                        help="""An output file containing point charges \
+                        that will be applied to every anion.""")
+    parser.add_argument('--point-charge-output-unique',
+                        help="""An output file containing unique point charges \
+                        for every atom.""")
+
+    parser.add_argument('--num-closest-pairs-qm',
+                        type=int,
+                        help="""The number of closest ionic liquid pairs to the \
+                        CO2 that will be treated quantum mechanically.""")
+    parser.add_argument('--num-closest-pairs-mm',
+                        type=int,
+                        help="""The number of closest ionic liquid pairs to the \
+                        CO2 that will be treated as point charges. If any pairs \
+                        are treated using QM, these are the closest outside the \
+                        QM region.""")
+    parser.add_argument('--distance-metric',
+                        choices=('centerofmass', 'atomic'),
+                        default='centerofmass',
+                        help="""The metric for calculating distances between \
+                        fragments. 'atomic' is ...""")
+    parser.add_argument('--all-pairs-qm',
+                        action='store_true',
+                        help="""Treat all ionic liquid pairs quantum mechanically.""")
+    parser.add_argument('--all-other-pairs-mm',
+                        action='store_true',
+                        help="""Treat all possible ionic liquid pairs as point \
+                        charges. If any pairs are treated using QM, treat all \
+                        others as point charges.""")
 
     args = parser.parse_args()
 
