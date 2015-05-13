@@ -25,7 +25,7 @@ from mbe.utils import pad_left_zeros
 import periodic_table as pt
 
 
-def rename_droplet_files():
+def rename_old_droplet_files():
     """Rename all the original droplet files from 'XXX_drop.xyz' to
     'drop_XXX.xyz', where the number is left-padded with zeros.
     """
@@ -59,59 +59,94 @@ def rename_droplet_files():
     return newfilenames
 
 
-def get_bond_graph(obmol):
-    """Test a few possible ways for getting the bond_connectivities using
-    Open Babel. Not used for the droplets.
+def rename_new_droplet_files():
+    """Rename all the original droplet files from 'clusterXXX.xyz' to
+    'drop_XXX.xyz', where the number is left-padded with zeros.
     """
 
-    bond_pair_indices1 = []
-    bond_pair_indices2 = []
+    filenames = glob('cluster*.xyz')
+    print(filenames)
 
-    for obbond in ob.OBMolBondIter(obmol):
-        bond_pair_indices1.append((obbond.GetBeginAtomIdx(),
-                                   obbond.GetEndAtomIdx(),
-                                   obbond.GetBondOrder()))
+    # Store the maximum length of the internal number.
+    maxlen = 0
 
-    for obbond in ob.OBMolBondIter(obmol):
-        bond_pair_indices2.append((obbond.GetBeginAtom().GetIndex(),
-                                   obbond.GetEndAtom().GetIndex(),
-                                   obbond.GetBondOrder()))
+    # Unfortunately, two full traversals need to be performed.
+    # 1. Find the maximum length of the internal number and store it.
+    for oldfilename in filenames:
+        numstr = oldfilename[7:-4]
+        newlen = len(numstr)
+        if newlen > maxlen:
+            maxlen = newlen
 
-    bonds = [{'atoms': [bond.GetBeginAtom().GetIndex(),
-                        bond.GetEndAtom().GetIndex()],
-              'order': bond.GetBondOrder(),
-              'symbols': [pt.Element[bond.GetBeginAtom().GetAtomicNum()],
-                          pt.Element[bond.GetEndAtom().GetAtomicNum()]]}
-             for bond in ob.OBMolBondIter(obmol)]
+    newfilenames = []
 
-    print('bond pair indices (1)')
-    print(bond_pair_indices1)
-    print('bond pair indices (2)')
-    print(bond_pair_indices2)
-    print('bond pair indices (3)')
-    for bond in bonds:
-        print(bond)
+    # 2. Go through each file again and rename.
+    for oldfilename in filenames:
+        numstr = oldfilename[7:-4]
+        filenumlen = len(numstr)
+        if filenumlen < maxlen:
+            numstr = pad_left_zeros(numstr, maxlen)
+        newfilename = 'drop_{}.xyz'.format(numstr)
+        os.rename(oldfilename, newfilename)
+        print(oldfilename + ' -> ' + newfilename)
+        newfilenames.append(newfilename)
 
-
-def make_obmol_from_file(filename, obconv):
-    """Make an Open Babel molecule from a file, using an OBConv instance
-    with the correct conversion type already set.
-    """
-
-    print(filename)
-    obmol = ob.OBMol()
-    obconv.ReadFile(obmol, filename)
-    obmol.ConnectTheDots()
-    obmol.PerceiveBondOrders()
-    return obmol
+    return newfilenames
 
 
-def make_ob_fragments_from_obmol(obmol):
-    """Make a list of Open Babel molecules (fragments) from an OBMol
-    containing multiple (non-bonded) molecules.
-    """
+# def get_bond_graph(obmol):
+#     """Test a few possible ways for getting the bond_connectivities using
+#     Open Babel. Not used for the droplets.
+#     """
 
-    return obmol.Separate()
+#     bond_pair_indices1 = []
+#     bond_pair_indices2 = []
+
+#     for obbond in ob.OBMolBondIter(obmol):
+#         bond_pair_indices1.append((obbond.GetBeginAtomIdx(),
+#                                    obbond.GetEndAtomIdx(),
+#                                    obbond.GetBondOrder()))
+
+#     for obbond in ob.OBMolBondIter(obmol):
+#         bond_pair_indices2.append((obbond.GetBeginAtom().GetIndex(),
+#                                    obbond.GetEndAtom().GetIndex(),
+#                                    obbond.GetBondOrder()))
+
+#     bonds = [{'atoms': [bond.GetBeginAtom().GetIndex(),
+#                         bond.GetEndAtom().GetIndex()],
+#               'order': bond.GetBondOrder(),
+#               'symbols': [pt.Element[bond.GetBeginAtom().GetAtomicNum()],
+#                           pt.Element[bond.GetEndAtom().GetAtomicNum()]]}
+#              for bond in ob.OBMolBondIter(obmol)]
+
+#     print('bond pair indices (1)')
+#     print(bond_pair_indices1)
+#     print('bond pair indices (2)')
+#     print(bond_pair_indices2)
+#     print('bond pair indices (3)')
+#     for bond in bonds:
+#         print(bond)
+
+
+# def make_obmol_from_file(filename, obconv):
+#     """Make an Open Babel molecule from a file, using an OBConv instance
+#     with the correct conversion type already set.
+#     """
+
+#     print(filename)
+#     obmol = ob.OBMol()
+#     obconv.ReadFile(obmol, filename)
+#     obmol.ConnectTheDots()
+#     obmol.PerceiveBondOrders()
+#     return obmol
+
+
+# def make_ob_fragments_from_obmol(obmol):
+#     """Make a list of Open Babel molecules (fragments) from an OBMol
+#     containing multiple (non-bonded) molecules.
+#     """
+
+#     return obmol.Separate()
 
 
 def determine_fragment_grouping(atoms):
@@ -155,41 +190,77 @@ def determine_fragment_grouping(atoms):
     return grouping
 
 
+def get_n_closest_anions(n):
+    """"""
+    pass
+
+
+def get_n_closest_cations(n):
+    """"""
+    pass
+
+
+def get_n_closest_pairs(n):
+    """"""
+    pass
+
+
 if __name__ == '__main__':
     import argparse
     import sys
-    import logging
+    # import logging
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--verbose', action='store_true', help="""Print more information to stdout.""")
-    parser.add_argument('--debug', action='store_true', help="""Print debug-level information to stdout.""")
-    parser.add_argument('--rename', action='store_true', help="""whether or not to run the rename method (only for the original files)""")
-    parser.add_argument('--single', help="""pass a single droplet XYZ file to only operate on that file""")
-    parser.add_argument('--path', default='.', help="""the path all of the droplet coordinate files are contained (can be relative or absolute""")
-    parser.add_argument('--write-fragment-input-qchem', action='store_true', help="""Write the new fragments from each droplet to disk as a single fragment input file (Q-Chem style).""")
-    parser.add_argument('--print-fragment-input-qchem', action='store_true', help="""Print the fragment input (Q-Chem style).""")
-    parser.add_argument('--write-fragment-input-psi', action='store_true', help="""Write the new fragments from each droplet to disk as a single fragment input file (Psi style).""")
-    parser.add_argument('--print-fragment-input-psi', action='store_true', help="""Print the fragment input (Psi style).""")
-    parser.add_argument('--mbe-order', type=int, default=0, help="""Order of the many-body expansion to go up to.""")
+    parser.add_argument('--verbose', action='store_true',
+                        help="""Print more information to stdout.""")
+    parser.add_argument('--debug', action='store_true',
+                        help="""Print debug-level information to stdout.""")
+    parser.add_argument('--rename-old', action='store_true',
+                        help="""whether or not to run the rename method on the \
+                        old set of droplet XYZ files (only for the original files!)""")
+    parser.add_argument('--rename-new', action='store_true',
+                        help="""whether or not to run the rename method on the \
+                        new set of droplet XYZ files (only for the original files!)""")
+    parser.add_argument('--single',
+                        help="""pass a single droplet XYZ file to only \
+                        operate on that file""")
+    parser.add_argument('--path', default='.',
+                        help="""the path all of the droplet coordinate files \
+                        are contained (can be relative or absolute)""")
+    parser.add_argument('--write-fragment-input-qchem', action='store_true',
+                        help="""Write the new fragments from each droplet to \
+                        disk as a single fragment input file (Q-Chem style).""")
+    parser.add_argument('--print-fragment-input-qchem', action='store_true',
+                        help="""Print the fragment input (Q-Chem style).""")
+    parser.add_argument('--write-fragment-input-psi', action='store_true',
+                        help="""Write the new fragments from each droplet to \
+                        disk as a single fragment input file (Psi style).""")
+    parser.add_argument('--print-fragment-input-psi', action='store_true',
+                        help="""Print the fragment input (Psi style).""")
+    parser.add_argument('--mbe-order', type=int, default=0,
+                        help="""Order of the many-body expansion to go up to.""")
 
     args = parser.parse_args()
 
     if args.debug:
         args.verbose = True
 
-    if args.verbose:
-        level = logging.INFO
-    if args.debug:
-        level = logging.DEBUG
-    else:
-        level = logging.WARNING
-    logging.basicConfig(level=level)
+    # if args.verbose:
+    #     level = logging.INFO
+    # if args.debug:
+    #     level = logging.DEBUG
+    # else:
+    #     level = logging.WARNING
+    # logging.basicConfig(level=level)
 
     # If we want to rename all the files, be safe and don't try any
     # other operations.
-    if args.rename:
-        rename_droplet_files()
+    if args.rename_old:
+        rename_old_droplet_files()
+        sys.exit(0)
+    if args.rename_new:
+        rename_new_droplet_files()
         sys.exit(0)
 
     if args.single:
@@ -253,6 +324,8 @@ if __name__ == '__main__':
         fragments = []
 
         grouping = determine_fragment_grouping(atoms)
+        if args.debug:
+            print(grouping)
 
         for i, group in zip(count(start=1), grouping):
             start, end = group[0], group[-1] + 1
