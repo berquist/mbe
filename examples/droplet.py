@@ -155,7 +155,9 @@ def determine_fragment_grouping(atoms):
     on distinct molecules.
     """
 
-    grouping = []
+    grouping_anions = []
+    grouping_cations = []
+    grouping_CO2 = []
 
     # We have some a priori knowledge of the ordering of atoms in each
     # of the molecules that can be used to our advantage.
@@ -182,32 +184,63 @@ def determine_fragment_grouping(atoms):
             # "group" representing a molecule. Only update the start
             # of the window when we have a match.
             if possible_ordering == atoms[start:end]:
-                grouping.append(list(range(start, end)))
+                grouping = list(range(start, end))
+                if possible_ordering == ordering_anion:
+                    grouping_anions.append(grouping)
+                elif possible_ordering == ordering_cation:
+                    grouping_cations.append(grouping)
+                else:
+                    grouping_CO2.append(grouping)
                 start = end
 
     # A list of lists, where each list contains the indices for atoms
     # on distinct molecules.
-    return grouping
+    return grouping_anions, grouping_cations, grouping_CO2
 
 
-def get_n_closest_anions(n):
-    """"""
+def distance_atomic(fragment1, fragment2):
+    """Return the distance between the atom in fragment 1 and the atom in
+    fragment 2 that are closest to each other."""
+
     pass
 
 
-def get_n_closest_cations(n):
-    """"""
+def distance_centerofmass(fragment1, fragment2):
+    """Return the distance between the center of mass of fragment 1 and
+    the center of mass of fragment 2."""
+
     pass
 
 
-def get_n_closest_fragments(n):
+def get_n_closest_anions(n, method):
     """"""
+
+    pass
+
+def get_n_closest_cations(n, method):
+    """"""
+
     pass
 
 
-def get_n_closest_pairs(n):
+def get_n_closest_fragments(n, method):
     """"""
+
     pass
+
+
+def get_n_closest_pairs(n, method):
+    """"""
+
+    pass
+
+
+# if method == 'atomic':
+#     pass
+# elif method == 'centerofmass':
+#     pass
+# else:
+#     pass
 
 
 if __name__ == '__main__':
@@ -382,8 +415,16 @@ if __name__ == '__main__':
 
         fragments = []
 
-        grouping = determine_fragment_grouping(atoms)
+        grouping_anions, grouping_cations, grouping_CO2 = determine_fragment_grouping(atoms)
+        grouping = grouping_anions + grouping_cations + grouping_CO2
         if args.debug:
+            print('grouping of anions:')
+            print(grouping_anions)
+            print('grouping of cations:')
+            print(grouping_cations)
+            print('grouping of CO2:')
+            print(grouping_CO2)
+            print('all groupings:')
             print(grouping)
 
         for i, group in zip(count(start=1), grouping):
