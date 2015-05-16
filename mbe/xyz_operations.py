@@ -77,26 +77,42 @@ def read_fragment_xyz(filename):
             atoms, coords, comments, atom_count)
 
 
-def write_fragment_section_qchem(fragments, filename=None):
+def write_fragment_section_qchem(fragments, filename=None, bookends=False):
     """From an iterable of Fragment()s, write a fragment file to disk that
     can either be read by these scripts or used as a Q-Chem input.
     """
+
     # Make a supersystem fragment so that we can get the total charge
     # and multiplicity.
     superfrag = mbe.fragment.combine_fragment_sequence(fragments)
+
     blocks = []
+
+    if bookends:
+        blocks.append('$molecule')
+
     blocks.append('{} {}'.format(superfrag.charge, superfrag.multiplicity))
+
     satemp = '{:3} {:15.10f} {:15.10f} {:15.10f}'
+
     for fragment in fragments:
         blocks.append('-- {}'.format(fragment.comment))
         blocks.append('{} {}'.format(fragment.charge, fragment.multiplicity))
         for atomsym, atomcoords in zip(fragment.atoms, fragment.coords):
             blocks.append(satemp.format(atomsym, *atomcoords))
+
+    if bookends:
+        blocks.append('$end')
+
+    section = '\n'.join(blocks)
+
     if filename is None:
-        print('\n'.join(blocks))
+        print(section)
     else:
         with open(filename, 'w') as outfile:
-            print('\n'.join(blocks), file=outfile)
+            print(section, file=outfile)
+
+    return section
 
 
 def write_fragment_section_psi(fragments, filename=None):
@@ -107,20 +123,76 @@ def write_fragment_section_psi(fragments, filename=None):
     that Psi doesn't explicitly require the charge and multiplicity of
     the supersystem.
     """
+
     # ...so we don't need to build the supersystem.
+
     blocks = []
+
     satemp = '{:3} {:15.10f} {:15.10f} {:15.10f}'
+
     for fragment in fragments:
         blocks.append('--')
         blocks.append('{} {}'.format(fragment.charge, fragment.multiplicity))
         for atomsym, atomcoords in zip(fragment.atoms, fragment.coords):
             blocks.append(satemp.format(atomsym, *atomcoords))
     del blocks[0]
+
     if filename is None:
-        print('\n'.join(blocks))
+        print(section)
     else:
         with open(filename, 'w') as outfile:
-            print('\n'.join(blocks), file=outfile)
+            print(section, file=outfile)
+
+    return section
+
+
+def make_pointcharge_section_qchem(fragments, bookends=False):
+    """If any fragments have point charges attached to them, placed at the
+    atomic centers, form the point charge contribution section for a
+    Q-Chem input.
+    """
+
+    lines = []
+
+    if bookends:
+        lines.append('$external_charges')
+
+    t = ' {:f} {:f} {:f} {:f}'.format
+
+    for fragment in fragments:
+        if fragment.pointcharges is not None:
+            for (x, y, z), c in zip(fragment.coords, fragment.pointcharges):
+                line = t(x, y, z, c)
+                lines.append(line)
+
+    if bookends:
+        lines.append('$end')
+
+    return '\n'.join(lines)
+
+
+def write_input_sections_qchem(fragments_qm, fragments_mm, filename=None):
+    """Given two sets of fragments, one meant to be treated quantum
+    mechanically and other meant to be represented as point charges, write
+    a combined $molecule/$external_charges part of a Q-Chem input.
+    """
+
+    section_molecule = write_fragment_section_qchem(fragments_qm, bookends=True)
+    section_external_charges = make_pointcharge_section_qchem(fragments_mm, bookends=True)
+
+    section = '\n'.join([
+        section_molecule,
+        '',
+        section_external_charges
+    ])
+
+    if filename is None:
+        print(section)
+    else:
+        with open(filename, 'w') as outfile:
+            print(section, file=outfile)
+
+    return section
 
 
 def write_individual_fragments(filename):

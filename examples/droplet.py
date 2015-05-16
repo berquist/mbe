@@ -10,8 +10,8 @@ from itertools import count
 from itertools import cycle
 
 import os
-import os.path
 import numpy as np
+import numpy.linalg as npl
 import sympy
 
 try:
@@ -198,49 +198,145 @@ def determine_fragment_grouping(atoms):
     return grouping_anions, grouping_cations, grouping_CO2
 
 
+def make_fragments_from_grouping(atoms, coords, grouping, start=1, pc=None, pc_addition='every'):
+    """Given a set of atoms (list of atomic symbols), coordinates (list of
+    length 3 lists), and a grouping of atoms into molecules, make a list
+    of Fragment objects corresponding to the grouping.
+
+    Optionally, deal with point charge business.
+    """
+
+    fragments = []
+
+    for i, group in zip(count(start=start), grouping):
+        start, end = group[0], group[-1] + 1
+        fragment = mbe.fragment.Fragment()
+        fragment.atoms = atoms[start:end]
+        fragment.formula_string = fragment._make_canonical_formula_string()
+        fragment.coords = coords[start:end]
+        fragment.charge = map_charges[fragment.formula_string]
+        fragment.nfragments = 1
+        fragment.comment = ' '.join([fragment.formula_string, '({})'.format(i)])
+        fragment.name = 'f{}'.format(i)
+        fragment.symbol_repr = {sympy.S(fragment.name)}
+        if pc is not None:
+            if pc_addition == 'every':
+                fragment.pointcharges = pc
+            elif pc_addition == 'unique':
+                fragment.pointcharges = pc[start:end]
+            else:
+                continue
+        fragments.append(fragment)
+
+    return fragments
+
+
+def cclib_get_point_charges(pc_file_path, pc_type):
+    """Use cclib to parse a QM output file for point charges (Mulliken,
+    Lowdin, CHELPG, ...).
+    """
+
+    from cclib.parser import ccopen
+
+    job = ccopen(pc_file_path)
+    data = job.parse()
+
+    return data.atomcharges[pc_type]
+
+
+# def add_point_charges_to_fragments(fragments, pointcharges):
+#     """Given a list of fragments, add list of point charges to each that
+#     will correspond to the effective charge of each atom in a fragment.
+
+#     This only makes sense if the number of atoms per fragment is the
+#     same as the number of point charges.
+#     """
+
+#     fragments_with_pointcharges = []
+
+#     for fragment in fragments:
+#         assert len(fragment.atoms) == len(pointcharges)
+#         assert len(fragment.coords) == len(pointcharges)
+#         fragment.pointcharges = pointcharges
+#         fragments_with_pointcharges.append(fragment)
+
+#     return fragments_with_pointcharges
+
+
+def distance_twopoint(l1, l2):
+    """Return the distance between two Cartesian points (given as
+    lists).
+    """
+    return npl.norm(np.asarray(l1) - np.asarray(l2))
+
+
 def distance_atomic(fragment1, fragment2):
     """Return the distance between the atom in fragment 1 and the atom in
-    fragment 2 that are closest to each other."""
+    fragment 2 that are closest to each other.
+    """
 
-    pass
+    shortest_distance = 99999.9
+
+    for c1 in fragment1.coords:
+        for c2 in fragment2.coords:
+            current_distance = distance_twopoint(c1, c2)
+            if current_distance < shortest_distance:
+                shortest_distance = current_distance
+
+    return shortest_distance
 
 
 def distance_centerofmass(fragment1, fragment2):
     """Return the distance between the center of mass of fragment 1 and
     the center of mass of fragment 2."""
 
+    # implement me!
     pass
 
 
-def get_n_closest_anions(n, method):
-    """"""
+def get_n_closest_fragments(n, target_fragment, other_fragments, method='atomic'):
+    """Return the n closest fragments to the target fragment, based on
+    distance between centers of mass or pairwise between atoms.
+    """
 
-    pass
+    closest_fragments = []
+    distances = []
 
-def get_n_closest_cations(n, method):
-    """"""
+    # Calculate the distance between the target fragment and the other
+    # fragments.
+    for fragidx, other_fragment in enumerate(other_fragments):
+        if method == 'atomic':
+            distance = distance_atomic(target_fragment, other_fragment)
+        elif method == 'centerofmass':
+            # implement me!
+            pass
+        else:
+            raise NotImplementedError
+        distances.append((fragidx, distance))
 
-    pass
+    # Now that all the distances are calculated, sort them in
+    # increasing order.
+    distances = sorted(distances, key=lambda x: x[1])
+
+    # Return the n closest fragments by:
+    # 1. Get the index of the ith fragment.
+    # 2. Look into all other fragments for it.
+    # 3. Append the Fragment object to the list.
+    for i in range(n):
+        closest_fragments.append(other_fragments[distances[i][0]])
+
+    return closest_fragments
 
 
-def get_n_closest_fragments(n, method):
-    """"""
+def get_n_closest_pairs(n, fragments_anions, fragments_cations, fragment_CO2, method='atomic'):
+    """Return the n closest ionic liquid pairs to the CO2, given lists of
+    Fragment objects of each.
+    """
 
-    pass
+    closest_fragments_anions = get_n_closest_fragments(n, fragment_CO2, fragments_anions, method)
+    closest_fragments_cations = get_n_closest_fragments(n, fragment_CO2, fragments_cations, method)
 
-
-def get_n_closest_pairs(n, method):
-    """"""
-
-    pass
-
-
-# if method == 'atomic':
-#     pass
-# elif method == 'centerofmass':
-#     pass
-# else:
-#     pass
+    return closest_fragments_anions, closest_fragments_cations
 
 
 if __name__ == '__main__':
@@ -289,6 +385,15 @@ if __name__ == '__main__':
                         action='store_true',
                         help="""Print the fragment input (Psi style).""")
 
+    parser.add_argument('--write-input-sections-qchem',
+                        action='store_true',
+                        help="""Same as --write-fragment-input-xxx, but with \
+                        possible point charges (Q-Chem style).""")
+    parser.add_argument('--print-input-sections-qchem',
+                        action='store_true',
+                        help="""Same as --print-fragment-input-xxx, but with \
+                        possible point charges (Q-Chem style).""")
+
     parser.add_argument('--mbe-order',
                         type=int,
                         default=0,
@@ -321,7 +426,7 @@ if __name__ == '__main__':
                         QM region.""")
     parser.add_argument('--distance-metric',
                         choices=('centerofmass', 'atomic'),
-                        default='centerofmass',
+                        default='atomic',
                         help="""The metric for calculating distances between \
                         fragments. 'atomic' is ...""")
     parser.add_argument('--all-pairs-qm',
@@ -415,6 +520,9 @@ if __name__ == '__main__':
 
         fragments = []
 
+        # Determine which atoms from the XYZ file belong to individual
+        # anions, cations, and the CO2, returning a list of lists,
+        # each containing the indices of an atom.
         grouping_anions, grouping_cations, grouping_CO2 = determine_fragment_grouping(atoms)
         grouping = grouping_anions + grouping_cations + grouping_CO2
         if args.debug:
@@ -427,23 +535,109 @@ if __name__ == '__main__':
             print('all groupings:')
             print(grouping)
 
-        for i, group in zip(count(start=1), grouping):
-            start, end = group[0], group[-1] + 1
-            fragment = mbe.fragment.Fragment()
-            fragment.atoms = atoms[start:end]
-            fragment.formula_string = fragment._make_canonical_formula_string()
-            fragment.coords = coords[start:end]
-            fragment.charge = map_charges[fragment.formula_string]
-            fragment.nfragments = 1
-            fragment.comment = ' '.join([fragment.formula_string, '({})'.format(i)])
-            fragment.name = 'f{}'.format(i)
-            fragment.symbol_repr = {sympy.S(fragment.name)}
-            if args.verbose:
-                print(fragment)
-            if args.debug:
-                print(fragment.symbol_repr)
-            fragments.append(fragment)
+        # Figure out whether or not we need to add point charges to
+        # fragments based on if certain command-line arguments were
+        # passed.
+        if args.point_charge_output_unique:
+            # There is a unique point charge for every atom in the
+            # input XYZ file.
+            pointcharges_unique = cclib_get_point_charges(args.point_charge_output_unique, args.point_charge_type)
+        elif args.point_charge_output_anion and args.point_charge_output_cation:
+            # There are common point charges for each anion and cation
+            # in the XYZ file.
+            pointcharges_anion = cclib_get_point_charges(args.point_charge_output_anion, args.point_charge_type)
+            pointcharges_cation = cclib_get_point_charges(args.point_charge_output_cation, args.point_charge_type)
+        else:
+            # Don't worry about adding point charges.
+            pass
 
+
+        # From the indices, ...
+        if args.point_charge_output_unique:
+            start = 1
+            fragments_anions = make_fragments_from_grouping(atoms, coords, grouping_anions, start=start, pc=pointcharges_unique, pc_addition='unique')
+            start = len(fragments_anions)
+            fragments_cations = make_fragments_from_grouping(atoms, coords, grouping_cations, start=start, pc=pointcharges_unique, pc_addition='unique')
+            start = len(fragments_anions) + len(fragments_cations)
+            fragment_CO2 = make_fragments_from_grouping(atoms, coords, grouping_CO2, start=start)[0]
+        elif args.point_charge_output_anion and args.point_charge_output_cation:
+            start = 1
+            fragments_anions = make_fragments_from_grouping(atoms, coords, grouping_anions, start=start, pc=pointcharges_anion, pc_addition='every')
+            start = len(fragments_anions)
+            fragments_cations = make_fragments_from_grouping(atoms, coords, grouping_cations, start=start, pc=pointcharges_cation, pc_addition='every')
+            start = len(fragments_anions) + len(fragments_cations)
+            fragment_CO2 = make_fragments_from_grouping(atoms, coords, grouping_CO2, start=start)[0]
+        else:
+            start = 1
+            fragments_anions = make_fragments_from_grouping(atoms, coords, grouping_anions, start=start)
+            start = len(fragments_anions)
+            fragments_cations = make_fragments_from_grouping(atoms, coords, grouping_cations, start=start)
+            start = len(fragments_anions) + len(fragments_cations)
+            fragment_CO2 = make_fragments_from_grouping(atoms, coords, grouping_CO2, start=start)[0]
+
+        if args.debug:
+            if args.point_charge_output_unique:
+                for f in fragments_anions:
+                    print(f.pointcharges)
+                for f in fragments_cations:
+                    print(f.pointcharges)
+            elif args.point_charge_output_cation and args.point_charge_output_anion:
+                for f in fragments_anions:
+                    print(f.pointcharges)
+                for f in fragments_cations:
+                    print(f.pointcharges)
+            else:
+                pass
+
+        fragments = fragments_anions + fragments_cations + [fragment_CO2]
+
+        disk_fragments_qm = []
+        disk_fragments_mm = []
+
+        # Control flow:
+        # 1. all fragments are QM
+        # 2. some fragments are QM
+        #  remainder: all are MM
+        #  remainder: some are MM
+        #  remainder: ignore
+        # 3. all other than CO2 are MM
+        # 4. some fragments are MM
+        # 5. CO2 alone
+        if args.all_pairs_qm:
+            disk_fragments_qm = fragments
+        elif args.num_closest_pairs_qm:
+            n_qm = args.num_closest_pairs_qm
+            closest_pairs_qm = get_n_closest_pairs(n_qm, fragments_anions, fragments_cations, fragment_CO2, method=args.distance_metric)
+            closest_anions_qm = closest_pairs_qm[0]
+            closest_cations_qm = closest_pairs_qm[1]
+            all_other_anions = [f for f in fragments_anions if f not in closest_anions_qm]
+            all_other_cations = [f for f in fragments_cations if f not in closest_cations_qm]
+            if args.all_other_pairs_mm:
+                disk_fragments_mm = all_other_anions + all_other_cations
+            elif args.num_closest_pairs_mm:
+                n_mm = args.num_closest_pairs_mm
+                closest_pairs_mm = get_n_closest_pairs(n_mm, all_other_anions, all_other_cations, fragment_CO2, method=args.distance_metric)
+                closest_anions_mm = closest_pairs_mm[0]
+                closest_cations_mm = closest_pairs_mm[1]
+                disk_fragments_mm = closest_anions_mm + closest_cations_mm
+            else:
+                pass
+            disk_fragments_qm = closest_anions_qm + closest_cations_qm + [fragment_CO2]
+        elif args.all_other_pairs_mm:
+            disk_fragments_qm = [fragment_CO2]
+            disk_fragments_mm = fragments_anions + fragments_cations
+        elif args.num_closest_pairs_mm:
+            n_mm = args.num_closest_pairs_mm
+            closest_pairs_mm = get_n_closest_pairs(n_mm, all_other_anions, all_other_cations, fragment_CO2, method=args.distance_metric)
+            closest_anions_mm = closest_pairs_mm[0]
+            closest_cations_mm = closest_pairs_mm[1]
+            disk_fragments_mm = closest_anions_mm + closest_cations_mm
+            disk_fragments_qm = [fragment_CO2]
+        else:
+            disk_fragments_qm = [fragment_CO2]
+
+        # For now, we do nothing with the many-bpdy expansion other
+        # than generate and print it out if requested.
         if args.mbe_order > 0:
             monomer_symbols = []
             for monomer in fragments:
@@ -457,11 +651,18 @@ if __name__ == '__main__':
                 print('Full MBE{} expression:'.format(args.mbe_order))
                 print(mbe_expression)
 
+        # Write or print full Q-Chem $molecule/$external_charges sections.
+        if args.write_input_sections_qchem:
+            mbe.xyz_operations.write_input_sections_qchem(disk_fragments_qm, disk_fragments_mm, filename='')
+        if args.print_input_sections_qchem:
+            mbe.xyz_operations.write_input_sections_qchem(disk_fragments_qm, disk_fragments_mm)
+
+        # Write fragments to disk or print them to stdout.
         if args.write_fragment_input_qchem:
-            mbe.xyz_operations.write_fragment_section_qchem(fragments, filename='frag_{}'.format(os.path.basename(filename)))
+            mbe.xyz_operations.write_fragment_section_qchem(disk_fragments_qm, filename='frag_{}'.format(os.path.basename(filename)))
         if args.write_fragment_input_psi:
-            mbe.xyz_operations.write_fragment_section_psi(fragments, filename='frag_{}'.format(os.path.basename(filename)))
+            mbe.xyz_operations.write_fragment_section_psi(disk_fragments_qm, filename='frag_{}'.format(os.path.basename(filename)))
         if args.print_fragment_input_qchem:
-            mbe.xyz_operations.write_fragment_section_qchem(fragments)
+            mbe.xyz_operations.write_fragment_section_qchem(disk_fragments_qm)
         if args.print_fragment_input_psi:
-            mbe.xyz_operations.write_fragment_section_psi(fragments)
+            mbe.xyz_operations.write_fragment_section_psi(disk_fragments_qm)
