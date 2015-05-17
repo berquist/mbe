@@ -1,0 +1,8 @@
+$rem
+ jobtype = freq
+ method = b3lyp
+ basis = 6-31g**
+ chelpg = false
+ molden_format = false
+$end
+
