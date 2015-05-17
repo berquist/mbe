@@ -628,7 +628,7 @@ if __name__ == '__main__':
             disk_fragments_mm = fragments_anions + fragments_cations
         elif args.num_closest_pairs_mm:
             n_mm = args.num_closest_pairs_mm
-            closest_pairs_mm = get_n_closest_pairs(n_mm, all_other_anions, all_other_cations, fragment_CO2, method=args.distance_metric)
+            closest_pairs_mm = get_n_closest_pairs(n_mm, fragments_anions, fragments_cations, fragment_CO2, method=args.distance_metric)
             closest_anions_mm = closest_pairs_mm[0]
             closest_cations_mm = closest_pairs_mm[1]
             disk_fragments_mm = closest_anions_mm + closest_cations_mm

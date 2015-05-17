@@ -77,7 +77,7 @@ def read_fragment_xyz(filename):
             atoms, coords, comments, atom_count)
 
 
-def write_fragment_section_qchem(fragments, filename=None, bookends=False):
+def write_fragment_section_qchem(fragments, filename=None, stdout=True, bookends=False):
     """From an iterable of Fragment()s, write a fragment file to disk that
     can either be read by these scripts or used as a Q-Chem input.
     """
@@ -106,8 +106,9 @@ def write_fragment_section_qchem(fragments, filename=None, bookends=False):
 
     section = '\n'.join(blocks)
 
-    if filename is None:
-        print(section)
+    if not filename:
+        if stdout:
+            print(section)
     else:
         with open(filename, 'w') as outfile:
             print(section, file=outfile)
@@ -115,7 +116,7 @@ def write_fragment_section_qchem(fragments, filename=None, bookends=False):
     return section
 
 
-def write_fragment_section_psi(fragments, filename=None):
+def write_fragment_section_psi(fragments, filename=None, stdout=True):
     """From an iterable of Fragment()s, write a fragment file to disk that
     can be used as a Psi input.
 
@@ -137,8 +138,9 @@ def write_fragment_section_psi(fragments, filename=None):
             blocks.append(satemp.format(atomsym, *atomcoords))
     del blocks[0]
 
-    if filename is None:
-        print(section)
+    if not filename:
+        if stdout:
+            print(section)
     else:
         with open(filename, 'w') as outfile:
             print(section, file=outfile)
@@ -160,7 +162,7 @@ def make_pointcharge_section_qchem(fragments, bookends=False):
     t = ' {:f} {:f} {:f} {:f}'.format
 
     for fragment in fragments:
-        if fragment.pointcharges is not None:
+        if hasattr(fragment, 'pointcharges'):
             for (x, y, z), c in zip(fragment.coords, fragment.pointcharges):
                 line = t(x, y, z, c)
                 lines.append(line)
@@ -171,13 +173,13 @@ def make_pointcharge_section_qchem(fragments, bookends=False):
     return '\n'.join(lines)
 
 
-def write_input_sections_qchem(fragments_qm, fragments_mm, filename=None):
+def write_input_sections_qchem(fragments_qm, fragments_mm, filename=None, stdout=True):
     """Given two sets of fragments, one meant to be treated quantum
     mechanically and other meant to be represented as point charges, write
     a combined $molecule/$external_charges part of a Q-Chem input.
     """
 
-    section_molecule = write_fragment_section_qchem(fragments_qm, bookends=True)
+    section_molecule = write_fragment_section_qchem(fragments_qm, stdout=False, bookends=True)
     section_external_charges = make_pointcharge_section_qchem(fragments_mm, bookends=True)
 
     section = '\n'.join([
@@ -186,8 +188,9 @@ def write_input_sections_qchem(fragments_qm, fragments_mm, filename=None):
         section_external_charges
     ])
 
-    if filename is None:
-        print(section)
+    if not filename:
+        if stdout:
+            print(section)
     else:
         with open(filename, 'w') as outfile:
             print(section, file=outfile)
