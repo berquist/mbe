@@ -8,17 +8,11 @@ from __future__ import print_function
 from glob import glob
 from itertools import count
 from itertools import cycle
+from math import sqrt
 
 import os
 import numpy as np
-import numpy.linalg as npl
-import sympy
-
-try:
-    import pybel as pb
-    import openbabel as ob
-except ImportError:
-    pass
+from sympy import S
 
 import mbe
 from mbe.utils import pad_left_zeros
@@ -218,7 +212,7 @@ def make_fragments_from_grouping(atoms, coords, grouping, start=1, pc=None, pc_a
         fragment.nfragments = 1
         fragment.comment = ' '.join([fragment.formula_string, '({})'.format(i)])
         fragment.name = 'f{}'.format(i)
-        fragment.symbol_repr = {sympy.S(fragment.name)}
+        fragment.symbol_repr = {S(fragment.name)}
         if pc is not None:
             if pc_addition == 'every':
                 fragment.pointcharges = pc
@@ -231,7 +225,7 @@ def make_fragments_from_grouping(atoms, coords, grouping, start=1, pc=None, pc_a
     return fragments
 
 
-def cclib_get_point_charges(pc_file_path, pc_type):
+def get_point_charges_qmout(pc_file_path, pc_type):
     """Use cclib to parse a QM output file for point charges (Mulliken,
     Lowdin, CHELPG, ...).
     """
@@ -244,30 +238,24 @@ def cclib_get_point_charges(pc_file_path, pc_type):
     return data.atomcharges[pc_type]
 
 
-# def add_point_charges_to_fragments(fragments, pointcharges):
-#     """Given a list of fragments, add list of point charges to each that
-#     will correspond to the effective charge of each atom in a fragment.
+def get_point_charges_txt(pc_file_path):
+    """..."""
 
-#     This only makes sense if the number of atoms per fragment is the
-#     same as the number of point charges.
-#     """
+    pointcharges = []
 
-#     fragments_with_pointcharges = []
+    with open(pc_file_path) as pc_file:
+        for line in pc_file:
+            pointcharges.append(float(line.split()[-1]))
 
-#     for fragment in fragments:
-#         assert len(fragment.atoms) == len(pointcharges)
-#         assert len(fragment.coords) == len(pointcharges)
-#         fragment.pointcharges = pointcharges
-#         fragments_with_pointcharges.append(fragment)
-
-#     return fragments_with_pointcharges
+    return pointcharges
 
 
 def distance_twopoint(l1, l2):
     """Return the distance between two Cartesian points (given as
     lists).
     """
-    return npl.norm(np.asarray(l1) - np.asarray(l2))
+
+    return sqrt(((l1[0] - l2[0])**2) + ((l1[1] - l2[1])**2) + ((l1[2] - l2[2])**2))
 
 
 def distance_atomic(fragment1, fragment2):
@@ -404,6 +392,14 @@ if __name__ == '__main__':
                         default='mulliken',
                         help="""The type of point charges to extract from \
                         an output file.""")
+    parser.add_argument('--point-charge-file-type',
+                        choices=('qmout', 'txt'),
+                        default='txt',
+                        help="""If 'qmout', the files containing point charges \
+                        are QM outputs to be parsed by cclib. If 'txt', they \
+                        are two columns, the first containing atomic symbols, \
+                        the second containing the charge; --point-charge-type \
+                        doesn't matter.""")
     parser.add_argument('--point-charge-output-cation',
                         help="""An output file containing point charges \
                         that will be applied to every cation.""")
@@ -437,6 +433,13 @@ if __name__ == '__main__':
                         help="""Treat all possible ionic liquid pairs as point \
                         charges. If any pairs are treated using QM, treat all \
                         others as point charges.""")
+
+    parser.add_argument('--make-supersystem',
+                        action='store_true',
+                        help="""When writing or printing fragment inputs, \
+                        combine all fragments into a single block, making a \
+                        'traditional' molecule input. For Q-Chem, this is \
+                        required when only working with a single fragment.""")
 
     args = parser.parse_args()
 
@@ -538,18 +541,26 @@ if __name__ == '__main__':
         # Figure out whether or not we need to add point charges to
         # fragments based on if certain command-line arguments were
         # passed.
-        if args.point_charge_output_unique:
-            # There is a unique point charge for every atom in the
-            # input XYZ file.
-            pointcharges_unique = cclib_get_point_charges(args.point_charge_output_unique, args.point_charge_type)
-        elif args.point_charge_output_anion and args.point_charge_output_cation:
-            # There are common point charges for each anion and cation
-            # in the XYZ file.
-            pointcharges_anion = cclib_get_point_charges(args.point_charge_output_anion, args.point_charge_type)
-            pointcharges_cation = cclib_get_point_charges(args.point_charge_output_cation, args.point_charge_type)
+        if args.point_charge_file_type == 'qmout':
+            if args.point_charge_output_unique:
+                # There is a unique point charge for every atom in the
+                # input XYZ file.
+                pointcharges_unique = get_point_charges_qmout(args.point_charge_output_unique, args.point_charge_type)
+            elif args.point_charge_output_anion and args.point_charge_output_cation:
+                # There are common point charges for each anion and cation
+                # in the XYZ file.
+                pointcharges_anion = get_point_charges_qmout(args.point_charge_output_anion, args.point_charge_type)
+                pointcharges_cation = get_point_charges_qmout(args.point_charge_output_cation, args.point_charge_type)
+            else:
+                # Don't worry about adding point charges.
+                pass
         else:
-            # Don't worry about adding point charges.
-            pass
+            # Must be the simple format.
+            if args.point_charge_output_unique:
+                pointcharges_unique = get_point_charges_txt(args.point_charge_output_unique)
+            elif args.point_charge_output_anion and args.point_charge_output_cation:
+                pointcharges_anion = get_point_charges_txt(args.point_charge_output_anion)
+                pointcharges_cation = get_point_charges_txt(args.point_charge_output_cation)
 
 
         # From the indices, ...
@@ -653,9 +664,9 @@ if __name__ == '__main__':
 
         # Write or print full Q-Chem $molecule/$external_charges sections.
         if args.write_input_sections_qchem:
-            mbe.xyz_operations.write_input_sections_qchem(disk_fragments_qm, disk_fragments_mm, filename='')
+            mbe.xyz_operations.write_input_sections_qchem(disk_fragments_qm, disk_fragments_mm, supersystem=args.make_supersystem, filename='')
         if args.print_input_sections_qchem:
-            mbe.xyz_operations.write_input_sections_qchem(disk_fragments_qm, disk_fragments_mm)
+            mbe.xyz_operations.write_input_sections_qchem(disk_fragments_qm, disk_fragments_mm, supersystem=args.make_supersystem)
 
         # Write fragments to disk or print them to stdout.
         if args.write_fragment_input_qchem:

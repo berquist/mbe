@@ -148,6 +148,38 @@ def write_fragment_section_psi(fragments, filename=None, stdout=True):
     return section
 
 
+def write_supersystem_qchem(fragments, filename=None, stdout=True, bookends=False):
+    """From an iterable of Fragment()s, combine them into a single
+    fragment (supersystem) suitable for a Q-Chem input.
+    """
+
+    # Make a supersystem fragment so that we can get the total charge
+    # and multiplicity.
+    superfrag = mbe.fragment.combine_fragment_sequence(fragments)
+
+    blocks = []
+
+    if bookends:
+        blocks.append('$molecule')
+
+    blocks.append('{} {}'.format(superfrag.charge, superfrag.multiplicity))
+    blocks.append(superfrag.xyz())
+
+    if bookends:
+        blocks.append('$end')
+
+    section = '\n'.join(blocks)
+
+    if not filename:
+        if stdout:
+            print(section)
+    else:
+        with open(filename, 'w') as outfile:
+            print(section, file=outfile)
+
+    return section
+
+
 def make_pointcharge_section_qchem(fragments, bookends=False):
     """If any fragments have point charges attached to them, placed at the
     atomic centers, form the point charge contribution section for a
@@ -173,13 +205,16 @@ def make_pointcharge_section_qchem(fragments, bookends=False):
     return '\n'.join(lines)
 
 
-def write_input_sections_qchem(fragments_qm, fragments_mm, filename=None, stdout=True):
+def write_input_sections_qchem(fragments_qm, fragments_mm, filename=None, stdout=True, supersystem=False):
     """Given two sets of fragments, one meant to be treated quantum
     mechanically and other meant to be represented as point charges, write
     a combined $molecule/$external_charges part of a Q-Chem input.
     """
 
-    section_molecule = write_fragment_section_qchem(fragments_qm, stdout=False, bookends=True)
+    if supersystem:
+        section_molecule = write_supersystem_qchem(fragments_qm, stdout=False, bookends=True)
+    else:
+        section_molecule = write_fragment_section_qchem(fragments_qm, stdout=False, bookends=True)
     section_external_charges = make_pointcharge_section_qchem(fragments_mm, bookends=True)
 
     section = '\n'.join([
