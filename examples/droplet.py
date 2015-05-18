@@ -412,10 +412,12 @@ if __name__ == '__main__':
 
     parser.add_argument('--num-closest-pairs-qm',
                         type=int,
+                        default=0,
                         help="""The number of closest ionic liquid pairs to the \
                         CO2 that will be treated quantum mechanically.""")
     parser.add_argument('--num-closest-pairs-mm',
                         type=int,
+                        default=0,
                         help="""The number of closest ionic liquid pairs to the \
                         CO2 that will be treated as point charges. If any pairs \
                         are treated using QM, these are the closest outside the \
@@ -466,7 +468,7 @@ if __name__ == '__main__':
     if args.single:
         filenames = [args.single]
     else:
-        filenames = [name for name in glob(os.path.join(args.path, '*.xyz'))]
+        filenames = [name for name in glob(os.path.join(args.path, 'drop_*.xyz'))]
 
     if args.debug:
         print(filenames)
@@ -664,15 +666,18 @@ if __name__ == '__main__':
 
         # Write or print full Q-Chem $molecule/$external_charges sections.
         if args.write_input_sections_qchem:
-            mbe.xyz_operations.write_input_sections_qchem(disk_fragments_qm, disk_fragments_mm, supersystem=args.make_supersystem, filename='')
+            filename = '{}_{}qm_{}mm'.format(os.path.splitext(os.path.basename(filename))[0], len(disk_fragments_qm), len(disk_fragments_mm))
+            mbe.xyz_operations.write_input_sections_qchem(disk_fragments_qm, disk_fragments_mm, supersystem=args.make_supersystem, filename=filename, stdout=False)
         if args.print_input_sections_qchem:
             mbe.xyz_operations.write_input_sections_qchem(disk_fragments_qm, disk_fragments_mm, supersystem=args.make_supersystem)
 
         # Write fragments to disk or print them to stdout.
         if args.write_fragment_input_qchem:
-            mbe.xyz_operations.write_fragment_section_qchem(disk_fragments_qm, filename='frag_{}'.format(os.path.basename(filename)))
+            filename = 'frag_{}'.format(os.path.basename(filename))
+            mbe.xyz_operations.write_fragment_section_qchem(disk_fragments_qm, filename=filename)
         if args.write_fragment_input_psi:
-            mbe.xyz_operations.write_fragment_section_psi(disk_fragments_qm, filename='frag_{}'.format(os.path.basename(filename)))
+            filename = 'frag_{}'.format(os.path.basename(filename))
+            mbe.xyz_operations.write_fragment_section_psi(disk_fragments_qm, filename=filename)
         if args.print_fragment_input_qchem:
             mbe.xyz_operations.write_fragment_section_qchem(disk_fragments_qm)
         if args.print_fragment_input_psi:
