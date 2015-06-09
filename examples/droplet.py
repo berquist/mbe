@@ -667,7 +667,7 @@ if __name__ == '__main__':
         # Write or print full Q-Chem $molecule/$external_charges sections.
         if args.write_input_sections_qchem:
             n_qm = (len(disk_fragments_qm) - 1) // 2
-            n_mm = (len(disk_fragments_mm) - 1) // 2
+            n_mm = len(disk_fragments_mm) // 2
             filename = '{}_{}qm_{}mm'.format(os.path.splitext(os.path.basename(filename))[0], n_qm, n_mm)
             mbe.xyz_operations.write_input_sections_qchem(disk_fragments_qm, disk_fragments_mm, supersystem=args.make_supersystem, filename=filename, stdout=False)
         if args.print_input_sections_qchem:
