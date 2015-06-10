@@ -19,7 +19,7 @@ n_mm_1=$(seq 0 2 16)
 n_mm_2=(32 64 128 256)
 n_mm_arr=( ${n_mm_1[@]} ${n_mm_2[@]} )
 
-for n_qm in $(seq 0 1 2); do
+for n_qm in $(seq 1 2); do
     for n_mm in ${n_mm_arr[@]}; do
         str="python ${HOME}/development/mbe/examples/droplet.py --write-input-sections-qchem --num-closest-pairs-qm=${n_qm} --num-closest-pairs-mm=${n_mm} --point-charge-output-cation=${pc_output_cation} --point-charge-output-anion=${pc_output_anion} --path=${1}"
         echo ${str}
@@ -36,5 +36,5 @@ genfiles=$(find ${PWD} -type f -name "drop_*qm_*mm")
 for genfile in ${genfiles[@]}; do
     genfilebase=$(basename ${genfile})
     cat ${remfile} >> ${genfile}
-    mv ${genfile} ${genfile//mm/mm.in}
+    mv ${genfile} ${genfile//mm/mm_eda.in}
 done
