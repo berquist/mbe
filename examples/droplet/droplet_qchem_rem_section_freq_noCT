@@ -9,5 +9,7 @@ $rem
  frgm_method = gia
  frgm_lpcorr = 0
  ideriv = 1
+ chelpg = true
+ molden_format = false
 $end
 

@@ -3,7 +3,10 @@ $rem
  jobtype = freq
  method = b3lyp
  basis = 6-31g**
- chelpg = false
+ scf_convergence = 10
+ thresh = 14
+ xc_grid = 000100000302
+ chelpg = true
  molden_format = false
 $end
 

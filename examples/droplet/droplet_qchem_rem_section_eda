@@ -8,5 +8,7 @@ $rem
  xc_grid = 000100000302
  frgm_method = gia
  frgm_lpcorr = rs_exact_scf
+ chelpg = true
+ molden_format = false
 $end
 

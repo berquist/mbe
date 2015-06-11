@@ -1,25 +1,26 @@
 #!/usr/bin/env bash
 
-## This script should be placed *in* the directory where all of the
+## This script should be copied into the directory where all of the
 ## input files are going to be generated!
 
 # What kind of calculation are we doing? One of {`freq`, `eda`,
 # `freq_noCT`}.
-CALCTYPE=eda
+CALCTYPE=freq_noCT
 
 # The *root* directory for the MBE code.
 MBE_ROOT_DIR=${HOME}/development/mbe
+DROPLET_DIR=${MBE_ROOT_DIR}/examples/droplet
 
 # Copy over the $rem section and point charges that will be used for
 # all the input files we're generating.
 
-cp ${MBE_ROOT_DIR}/examples/droplet_qchem_rem_section_${CALCTYPE} .
-cp ${MBE_ROOT_DIR}/examples/droplet_anion_chelpg.txt .
-cp ${MBE_ROOT_DIR}/examples/droplet_cation_chelpg.txt .
+cp ${DROPLET_DIR}/droplet_qchem_rem_section_${CALCTYPE} .
+cp ${DROPLET_DIR}/droplet_anion_chelpg.txt .
+cp ${DROPLET_DIR}/droplet_cation_chelpg.txt .
 
 # Copy over the driver script that will generate all the inputs.
 
-cp ${MBE_ROOT_DIR}/examples/droplet_make_inputs_${CALCTYPE}.sh .
+cp ${DROPLET_DIR}/droplet_make_inputs_${CALCTYPE}.sh .
 
 # We call a shell script that calls a shell script that calls a Python
 # script...
