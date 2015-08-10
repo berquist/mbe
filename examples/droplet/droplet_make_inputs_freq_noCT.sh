@@ -15,8 +15,8 @@ remfile="droplet_qchem_rem_section_freq_noCT"
 
 # These are the Q-Chem outputs Mulliken and CHELPG charges that will
 # be used as point charges.
-pc_output_anion="droplet_anion_chelpg.txt"
-pc_output_cation="droplet_cation_chelpg.txt"
+pc_output_anion="point_charges_anion.txt"
+pc_output_cation="point_charges_cation.txt"
 
 # Vary the number of QM fragments and MM fragments for every droplet.
 

@@ -15,8 +15,8 @@ DROPLET_DIR=${MBE_ROOT_DIR}/examples/droplet
 # all the input files we're generating.
 
 cp ${DROPLET_DIR}/droplet_qchem_rem_section_${CALCTYPE} .
-cp ${DROPLET_DIR}/droplet_anion_chelpg.txt .
-cp ${DROPLET_DIR}/droplet_cation_chelpg.txt .
+cp ${DROPLET_DIR}/point_charges_anion.txt .
+cp ${DROPLET_DIR}/point_charges_cation.txt .
 
 # Copy over the driver script that will generate all the inputs.
 
