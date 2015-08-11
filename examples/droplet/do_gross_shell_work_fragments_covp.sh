@@ -8,7 +8,7 @@
 #  jobtype = freq (w/o CT) => fragments
 #  jobtype = eda           => fragments
 #  jobtype = eda (w/ COVP) => fragments_covp
-MOLECULE_SECTION_TYPE=fragments
+MOLECULE_SECTION_TYPE=fragments_covp
 
 # The *root* directory for the MBE code.
 MBE_ROOT_DIR="${HOME}/development/mbe"

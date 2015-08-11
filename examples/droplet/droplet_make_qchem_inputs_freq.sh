@@ -7,6 +7,7 @@
 #  joptype = freq          => supersystem
 #  jobtype = freq (w/o CT) => fragments
 #  jobtype = eda           => fragments
+#  jobtype = eda (w/ COVP) => fragments_covp
 MOLECULE_SECTION_TYPE=supersystem
 CALC_TYPE=freq
 

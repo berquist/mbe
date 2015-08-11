@@ -219,10 +219,19 @@ def make_fragments_from_grouping(atoms, coords, grouping, start=1, pc=None, pc_a
             elif pc_addition == 'unique':
                 fragment.pointcharges = pc[start:end]
             else:
-                continue
+                pass
         fragments.append(fragment)
 
     return fragments
+
+
+def combine_fragments_for_covp(fragments):
+    """COVP analysis with Q-Chem can only be performed with two
+    fragments. Given a list of N fragments, combine the first N-1 into
+    one, leaving the last one uncombined.
+    """
+
+    return [combine_fragment_sequence(fragments[:-1]), fragments[-1]]
 
 
 def get_point_charges_qmout(pc_file_path, pc_type):
@@ -239,7 +248,9 @@ def get_point_charges_qmout(pc_file_path, pc_type):
 
 
 def get_point_charges_txt(pc_file_path):
-    """..."""
+    """Extract point charges from a plain text file, where the charges
+    themselves are in a column (assumed to be the last).
+    """
 
     pointcharges = []
 
@@ -442,6 +453,11 @@ if __name__ == '__main__':
                         combine all fragments into a single block, making a \
                         'traditional' molecule input. For Q-Chem, this is \
                         required when only working with a single fragment.""")
+    parser.add_argument('--qchem-covp',
+                        action='store_true',
+                        help="""If writing a fragment (non-supersystem) input for Q-Chem, combine
+                        all the fragments except the last, so COVP analysis can be
+                        performed.""")
 
     args = parser.parse_args()
 
@@ -649,7 +665,12 @@ if __name__ == '__main__':
         else:
             disk_fragments_qm = [fragment_CO2]
 
-        # For now, we do nothing with the many-bpdy expansion other
+        # Do any of the fragments need to be recombined for any reason
+        # (such as COVP analysis)?
+        if args.qchem_covp:
+            disk_fragments_qm = combine_fragments_for_covp(disk_fragments_qm)
+
+        # For now, we do nothing with the many-body expansion other
         # than generate and print it out if requested.
         if args.mbe_order > 0:
             monomer_symbols = []
