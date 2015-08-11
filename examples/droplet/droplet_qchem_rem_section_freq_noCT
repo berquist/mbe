@@ -3,7 +3,8 @@ $rem
  jobtype = freq
  method = b3lyp
  basis = 6-31g**
- scf_convergence = 9
+ scf_convergence = 8
+ thresh = 11
  xc_grid = 000100000302
  frgm_method = stoll
  frgm_lpcorr = 0
