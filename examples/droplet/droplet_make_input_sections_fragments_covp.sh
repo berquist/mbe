@@ -6,8 +6,8 @@
 
 # The main directory for the MBE code might need to be changed for
 # your particular machine.
-MBE_ROOT_DIR=${HOME}/development/mbe
-DROPLET_DIR=${MBE_ROOT_DIR}/examples/droplet
+MBE_ROOT_DIR="${HOME}/development/mbe"
+DROPLET_DIR="${MBE_ROOT_DIR}/examples/droplet"
 
 # These files contain the point charges that will be used for the
 # cation and anion; the format is such that they can be copied

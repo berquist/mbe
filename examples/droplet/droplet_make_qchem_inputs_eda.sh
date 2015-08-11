@@ -18,7 +18,7 @@ DROPLET_DIR="${MBE_ROOT_DIR}/examples/droplet"
 # Copy over the $rem section that will be used for all the input files
 # we're generating.
 
-remfile="droplet_qchem_rem_section_${CALC_TYPE}"
+remfile=droplet_qchem_rem_section_${CALC_TYPE}
 cp "${DROPLET_DIR}/${remfile}" .
 
 # Create input files by appending the $rem section to files that

@@ -11,12 +11,12 @@ from itertools import cycle
 from math import sqrt
 
 import os
-import numpy as np
+# import numpy as np
 from sympy import S
 
 import mbe
 from mbe.utils import pad_left_zeros
-import periodic_table as pt
+# import periodic_table as pt
 
 
 def rename_old_droplet_files():
@@ -231,7 +231,7 @@ def combine_fragments_for_covp(fragments):
     one, leaving the last one uncombined.
     """
 
-    return [combine_fragment_sequence(fragments[:-1]), fragments[-1]]
+    return [mbe.fragment.combine_fragment_sequence(fragments[:-1]), fragments[-1]]
 
 
 def get_point_charges_qmout(pc_file_path, pc_type):
@@ -665,6 +665,12 @@ if __name__ == '__main__':
         else:
             disk_fragments_qm = [fragment_CO2]
 
+        # This needs to come before any possible fragment
+        # recombination, otherwise the count will be wrong (always 0)!
+        # The format of the filename could be change to specify both #
+        # of fragments and # of "pairs", but not for now...
+        n_qm = (len(disk_fragments_qm) - 1) // 2
+
         # Do any of the fragments need to be recombined for any reason
         # (such as COVP analysis)?
         if args.qchem_covp:
@@ -687,7 +693,6 @@ if __name__ == '__main__':
 
         # Write or print full Q-Chem $molecule/$external_charges sections.
         if args.write_input_sections_qchem:
-            n_qm = (len(disk_fragments_qm) - 1) // 2
             n_mm = len(disk_fragments_mm) // 2
             filename = '{}_{}qm_{}mm'.format(os.path.splitext(os.path.basename(filename))[0], n_qm, n_mm)
             mbe.xyz_operations.write_input_sections_qchem(disk_fragments_qm, disk_fragments_mm, supersystem=args.make_supersystem, filename=filename, stdout=False)
