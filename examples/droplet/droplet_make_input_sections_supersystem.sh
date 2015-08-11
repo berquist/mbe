@@ -9,22 +9,20 @@
 MBE_ROOT_DIR=${HOME}/development/mbe
 DROPLET_DIR=${MBE_ROOT_DIR}/examples/droplet
 
-# This file holds the Q-Chem $rem section that will be applied to
-# every input.
-remfile="droplet_qchem_rem_section_freq"
-
-# These are the Q-Chem outputs Mulliken and CHELPG charges that will
-# be used as point charges.
+# These files contain the point charges that will be used for the
+# cation and anion; the format is such that they can be copied
+# directly from a Q-Chem output (Mulliken, Hirshfeld, ChElPG,
+# Merz-Kollman...).
 pc_output_anion="point_charges_anion.txt"
 pc_output_cation="point_charges_cation.txt"
 
 # Vary the number of QM fragments and MM fragments for every droplet.
 
 n_mm_1=$(seq 0 2 16)
-n_mm_2=(32 64 128 256)
+n_mm_2=(32 64 128)
 n_mm_arr=( ${n_mm_1[@]} ${n_mm_2[@]} )
 
-for n_qm in $(seq 0 1 2); do
+for n_qm in $(seq 0 1 4); do
     for n_mm in ${n_mm_arr[@]}; do
         str="python ${DROPLET_DIR}/droplet.py --write-input-sections-qchem --num-closest-pairs-qm=${n_qm} --num-closest-pairs-mm=${n_mm} --point-charge-output-cation=${pc_output_cation} --point-charge-output-anion=${pc_output_anion} --make-supersystem --path=${1}"
         echo ${str}
@@ -33,13 +31,4 @@ for n_qm in $(seq 0 1 2); do
     str="python ${DROPLET_DIR}/droplet.py --write-input-sections-qchem --num-closest-pairs-qm=${n_qm} --all-other-pairs-mm --point-charge-output-cation=${pc_output_cation} --point-charge-output-anion=${pc_output_anion} --make-supersystem --path=${1}"
     echo ${str}
     eval ${str}
-done
-
-# Append the $rem section to every input and change the file ending to
-# '.in'.
-genfiles=$(find ${PWD} -type f -name "drop_*qm_*mm")
-for genfile in ${genfiles[@]}; do
-    genfilebase=$(basename ${genfile})
-    cat ${remfile} >> ${genfile}
-    mv ${genfile} ${genfile//mm/mm_freq.in}
 done
