@@ -22,11 +22,12 @@ cp "${DROPLET_DIR}/point_charges_cation.txt" .
 
 # Copy over the driver script that will generate all the inputs.
 
-cp "${DROPLET_DIR}/droplet_make_input_sections_${MOLECULE_SECTION_TYPE}.sh" .
+DRIVER_NAME="droplet_make_qchem_input_sections_${MOLECULE_SECTION_TYPE}.sh"
+cp "${DROPLET_DIR}/${DRIVER_NAME}" .
 
 # We call a shell script that calls a shell script that calls a Python
 # script...
 
 # The driver that handles number of QM pairs, number of MM pairs, and
 # so on only requires the path to the XYZ files.
-./droplet_make_input_sections_${MOLECULE_SECTION_TYPE}.sh ../xyz
+./${DRIVER_NAME} ../xyz
