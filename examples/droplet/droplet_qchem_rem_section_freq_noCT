@@ -9,8 +9,9 @@ $rem
  frgm_method = stoll
  frgm_lpcorr = 0
  ideriv = 1
- chelpg = true
+ chelpg = false
  molden_format = false
+ scf_print_frgm = false
  sym_ignore = true
  symmetry = false
 $end

@@ -8,8 +8,9 @@ $rem
  xc_grid = 000100000302
  frgm_method = stoll
  frgm_lpcorr = rs_exact_scf
- chelpg = true
+ chelpg = false
  molden_format = false
+ scf_print_frgm = false
  sym_ignore = true
  symmetry = false
 $end
