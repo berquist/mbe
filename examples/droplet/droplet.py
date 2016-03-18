@@ -183,8 +183,10 @@ def determine_fragment_grouping(atoms):
                     grouping_anions.append(grouping)
                 elif possible_ordering == ordering_cation:
                     grouping_cations.append(grouping)
-                else:
+                elif possible_ordering == ordering_CO2:
                     grouping_CO2.append(grouping)
+                else:
+                    raise Exception
                 start = end
 
     # A list of lists, where each list contains the indices for atoms
