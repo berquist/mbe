@@ -19,6 +19,14 @@ from mbe.utils import pad_left_zeros
 # import periodic_table as pt
 
 
+# These are the total charges for the each of the ionic liquid
+# components.
+MAP_CHARGES = {
+    'C8H15N2': +1,
+    'F6P': -1,
+    'CO2': 0,
+}
+
 def rename_old_droplet_files():
     """Rename all the original droplet files from 'XXX_drop.xyz' to
     'drop_XXX.xyz', where the number is left-padded with zeros.
@@ -210,7 +218,7 @@ def make_fragments_from_grouping(atoms, coords, grouping, start=1, pc=None, pc_a
         fragment.atoms = atoms[start:end]
         fragment.formula_string = fragment._make_canonical_formula_string()
         fragment.coords = coords[start:end]
-        fragment.charge = map_charges[fragment.formula_string]
+        fragment.charge = MAP_CHARGES[fragment.formula_string]
         fragment.nfragments = 1
         fragment.comment = ' '.join([fragment.formula_string, '({})'.format(i)])
         fragment.name = 'f{}'.format(i)
@@ -494,14 +502,6 @@ if __name__ == '__main__':
     # obconv = ob.OBConversion()
     # obconv.SetInAndOutFormats('xyz', 'xyz')
 
-    # These are the total charges for the each of the ionic liquid
-    # components.
-    map_charges = {
-        'C8H15N2': +1,
-        'F6P': -1,
-        'CO2': 0,
-    }
-
     for filename in filenames:
 
         # Here is how it might be done with Open Babel as a more general case..
@@ -516,10 +516,10 @@ if __name__ == '__main__':
         #     atoms = [pt.Element[atom.atomicnum] for atom in pbmol_fragment.atoms]
         #     coords = [atom.coords for atom in pbmol_fragment.atoms]
         #     formula = pbmol_fragment.formula
-        #     if formula not in map_charges.keys():
+        #     if formula not in MAP_CHARGES.keys():
         #         print(formula)
-        #     if formula in map_charges.keys():
-        #         charge = map_charges[formula]
+        #     if formula in MAP_CHARGES.keys():
+        #         charge = MAP_CHARGES[formula]
         #     else:
         #         charge = -999
 
