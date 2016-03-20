@@ -11,12 +11,12 @@ from itertools import cycle
 from math import sqrt
 
 import os
-# import numpy as np
+import numpy as np
 from sympy import S
 
 import mbe
 from mbe.utils import pad_left_zeros
-# import periodic_table as pt
+import mbe.periodic_table as pt
 
 
 # These are the total charges for the each of the ionic liquid
@@ -284,7 +284,7 @@ def distance_atomic(fragment1, fragment2):
     fragment 2 that are closest to each other.
     """
 
-    shortest_distance = 99999.9
+    shortest_distance = 1.0e20
 
     for c1 in fragment1.coords:
         for c2 in fragment2.coords:
@@ -295,12 +295,46 @@ def distance_atomic(fragment1, fragment2):
     return shortest_distance
 
 
+distance_atomic_shortest = distance_atomic
+
+
+def distance_atomic_longest(fragment1, fragment2):
+    """Return the distance between the atom in fragment 1 and the atom in
+    fragment 2 that are furthest from each other.
+    """
+
+    longest_distance = -1.0e20
+
+    for c1 in fragment1.coords:
+        for c2 in fragment2.coords:
+            current_distance = distance_twopoint(c1, c2)
+            if current_distance > longest_distance:
+                longest_distance = current_distance
+
+    return longest_distance
+
+
 def distance_centerofmass(fragment1, fragment2):
     """Return the distance between the center of mass of fragment 1 and
     the center of mass of fragment 2."""
 
-    # implement me!
-    pass
+    COM_fragment1 = fragment_centerofmass(fragment1)
+    COM_fragment2 = fragment_centerofmass(fragment2)
+
+    return distance_twopoint(COM_fragment1, COM_fragment2)
+
+
+def fragment_centerofmass(fragment):
+    """Calculate the center of mass (COM) of a fragment."""
+
+    masses = np.array([pt.Mass[element] for element in fragment.atoms])
+    mass_sum = np.sum(masses)
+    coords = np.array(fragment.coords)
+    COMx = np.sum(coords[:, 0] * masses) / mass_sum
+    COMy = np.sum(coords[:, 1] * masses) / mass_sum
+    COMz = np.sum(coords[:, 2] * masses) / mass_sum
+
+    return np.array([COMx, COMy, COMz])
 
 
 def get_n_closest_fragments(n, target_fragment, other_fragments, method='atomic'):
@@ -311,14 +345,17 @@ def get_n_closest_fragments(n, target_fragment, other_fragments, method='atomic'
     closest_fragments = []
     distances = []
 
+    if method == 'centerofmass':
+        COM_target = fragment_centerofmass(target_fragment)
+
     # Calculate the distance between the target fragment and the other
     # fragments.
     for fragidx, other_fragment in enumerate(other_fragments):
         if method == 'atomic':
             distance = distance_atomic(target_fragment, other_fragment)
         elif method == 'centerofmass':
-            # implement me!
-            pass
+            COM_other = fragment_centerofmass(other_fragment)
+            distance = distance_twopoint(COM_target, COM_other)
         else:
             raise NotImplementedError
         distances.append((fragidx, distance))
