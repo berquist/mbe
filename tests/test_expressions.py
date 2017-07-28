@@ -31,10 +31,12 @@ class TestExpressions(unittest.TestCase):
         self.assertEqual(ee.MBE5_itertools(self.ten_symbols),
                          e.MBEn(self.ten_symbols, 5))
 
+    @unittest.skip("takes too long to run")
     def test_MBE6_equivalence(self):
         self.assertEqual(ee.MBE6_itertools(self.ten_symbols),
                          e.MBEn(self.ten_symbols, 6))
 
+    @unittest.skip("takes too long to run")
     def test_MBE7_equivalence(self):
         self.assertEqual(ee.MBE7_itertools(self.ten_symbols),
                          e.MBEn(self.ten_symbols, 7))
