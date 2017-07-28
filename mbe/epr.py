@@ -4,7 +4,7 @@
 import numpy as np
 
 import mbe
-from mbe.fragment import generate_fragment_from_term
+from .fragment import generate_fragment_from_term
 
 
 def remove_inactive_terms(expr, fragments):

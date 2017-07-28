@@ -7,7 +7,7 @@ import sympy
 from toolz import frequencies
 
 import mbe
-from mbe.xyz_operations import read_fragment_xyz
+from .xyz_operations import read_fragment_xyz
 
 
 class Fragment(object):
@@ -90,7 +90,7 @@ class Fragment(object):
         """
 
         xyz_repr = []
-        satemp = "{:3s} {:12.7f} {:12.7f} {:12.7f}\n"
+        satemp = "{:3s} {:20.15f} {:20.15f} {:20.15f}\n"
         for atom, coords in zip(self.atoms, self.coords):
             xyz_repr.append(satemp.format(atom, *coords))
         return "".join(xyz_repr).rstrip('\n')

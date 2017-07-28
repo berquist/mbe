@@ -6,10 +6,10 @@ import subprocess
 
 import mbe
 
-try:
-    import orcaparse
-except ImportError:
-    pass
+# try:
+#     import orcaparse
+# except ImportError:
+#     pass
 
 
 def read_nodefile(path):

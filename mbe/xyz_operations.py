@@ -5,7 +5,7 @@ from __future__ import print_function
 
 import os.path
 
-import mbe
+
 
 
 def read_xyz(filename):
@@ -93,7 +93,7 @@ def write_fragment_section_qchem(fragments, filename=None, stdout=True, bookends
 
     blocks.append('{} {}'.format(superfrag.charge, superfrag.multiplicity))
 
-    satemp = '{:3} {:15.10f} {:15.10f} {:15.10f}'
+    satemp = '{:3} {:20.15f} {:20.15f} {:20.15f}'
 
     for fragment in fragments:
         blocks.append('-- {}'.format(fragment.comment))
@@ -129,7 +129,7 @@ def write_fragment_section_psi(fragments, filename=None, stdout=True):
 
     blocks = []
 
-    satemp = '{:3} {:15.10f} {:15.10f} {:15.10f}'
+    satemp = '{:3} {:20.15f} {:20.15f} {:20.15f}'
 
     for fragment in fragments:
         blocks.append('--')
@@ -244,7 +244,7 @@ def write_individual_fragments(filename):
     # string templates
     sftemp = os.path.splitext(filename)[0] + '_F{}.xyz'
     sctemp = '{} {} {}\n'
-    satemp = '{:3} {:15.10f} {:15.10f} {:15.10f}\n'
+    satemp = '{:3} {:20.15f} {:20.15f} {:20.15f}\n'
     # generate a single XYZ file for each fragment
     for fid in range(nfragments):
         with open(sftemp.format(fid), 'w') as xyzfile:
@@ -265,7 +265,7 @@ def write_full_system(filename):
         atoms, coords, comments, atom_count = read_fragment_xyz(filename)
     nfragments = len(frag_charges)
     sftemp = os.path.splitext(filename)[0] + '_FULL.xyz'
-    satemp = '{:3} {:15.10f} {:15.10f} {:15.10f}\n'
+    satemp = '{:3} {:20.15f} {:20.15f} {:20.15f}\n'
     with open(sftemp, 'w') as xyzfile:
         xyzfile.write('{}\n\n'.format(atom_count))
         for fid in range(nfragments):
