@@ -5,7 +5,7 @@ from __future__ import print_function
 
 import os.path
 
-from .fragment import combine_fragment_sequence
+from .fragment import Fragment, combine_fragment_sequence
 
 
 def read_xyz(filename):
@@ -23,58 +23,6 @@ def read_xyz(filename):
                 coords.append(list(map(float, line.split()[1:])))
 
     return (natoms, comment, atoms, coords)
-
-
-def read_fragment_xyz(filename):
-    """A more complicated example, reading an XYZ file divided into
-    fragments, again doing so incrementally.
-    """
-    comments = []
-    frag_charges = []
-    frag_multiplicities = []
-    atoms = []
-    coords = []
-    frag_atoms = []
-    frag_coords = []
-    atom_count = 0
-    with open(filename) as fragfile:
-        # the very first line is the system's total charge and multiplicity
-        sys_charge, sys_multiplicity \
-            = list(map(int, fragfile.readline().split()))
-        for line in fragfile:
-            # each fragment section is separated by '--' as a delimiter
-            # if we find it, we're at the start of a new block
-            if line[0:2] == '--':
-                comment = " ".join(line.split()[1:])
-                comments.append(comment)
-                # the fragment's own charge and multiplicity
-                # must come immediately afterwards
-                frag_charge, frag_multiplicity \
-                    = list(map(int, next(fragfile).split()))
-                frag_charges.append(frag_charge)
-                frag_multiplicities.append(frag_multiplicity)
-                # reset the fragment atoms and coordinates after append
-                if len(frag_atoms) > 0:
-                    atoms.append(frag_atoms)
-                if len(frag_coords) > 0:
-                    coords.append(frag_coords)
-                frag_atoms = []
-                frag_coords = []
-            # if we aren't dealing with the two fragment header lines, it
-            # must be a fragment's atom entry
-            else:
-                atom = line.split()[0]
-                atom_coords = list(map(float, line.split()[1:]))
-                frag_atoms.append(atom)
-                frag_coords.append(atom_coords)
-                atom_count += 1
-        # these need to be here otherwise the last fragment
-        # will never be appended
-        atoms.append(frag_atoms)
-        coords.append(frag_coords)
-
-    return (sys_charge, sys_multiplicity, frag_charges, frag_multiplicities,
-            atoms, coords, comments, atom_count)
 
 
 def write_fragment_section_qchem(fragments, filename=None, stdout=True, bookends=False):
@@ -240,7 +188,7 @@ def write_individual_fragments(filename):
     fragment XYZ files, and write them to disk.
     """
     sys_charge, sys_multiplicity, frag_charges, frag_multiplicities, \
-        atoms, coords, comments, atom_count = read_fragment_xyz(filename)
+        atoms, coords, comments, atom_count = Fragment.read_fragment_xyz(filename)
     # the number of fragments is the length of any of the returned lists
     nfragments = len(frag_charges)
     # string templates
@@ -264,7 +212,7 @@ def write_full_system(filename):
     the full system.
     """
     sys_charge, sys_multiplicity, frag_charges, frag_multiplicities, \
-        atoms, coords, comments, atom_count = read_fragment_xyz(filename)
+        atoms, coords, comments, atom_count = Fragment.read_fragment_xyz(filename)
     nfragments = len(frag_charges)
     sftemp = os.path.splitext(filename)[0] + '_FULL.xyz'
     satemp = '{:3} {:20.15f} {:20.15f} {:20.15f}\n'
