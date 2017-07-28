@@ -5,18 +5,18 @@ files."""
 
 from __future__ import print_function
 
+import os
 from glob import glob
 from itertools import count
 from itertools import cycle
 from math import sqrt
 
-import os
 import numpy as np
 from sympy import S
+import periodictable
 
 import mbe
 from mbe.utils import pad_left_zeros
-import mbe.periodic_table as pt
 
 
 # These are the total charges for the each of the ionic liquid
@@ -254,6 +254,7 @@ def get_point_charges_qmout(pc_file_path, pc_type):
     job = ccopen(pc_file_path)
     data = job.parse()
 
+    # pylint: disable=E1101
     return data.atomcharges[pc_type]
 
 

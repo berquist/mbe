@@ -27,7 +27,7 @@ f4 = f7[:4]
 f5 = f7[:5]
 f6 = f7[:6]
 "
-echo ${SETUP}
+echo "${SETUP}"
 
 python -m timeit -r 5 -s "${SETUP}" "dE2(*f2)"
 python -m timeit -r 5 -s "${SETUP}" "dE2gen(*f2)"
@@ -51,7 +51,7 @@ f4 = f7[:4]
 f5 = f7[:5]
 f6 = f7[:6]
 "
-echo ${SETUP}
+echo "${SETUP}"
 
 echo "1st-order explicit vs. recursive"
 python -m timeit -r 5 -s "${SETUP}" "MBE1_explicit(f7)"
@@ -71,7 +71,7 @@ from mbe.expressions_explicit import MBE1_explicit, MBE2_explicit, MBE3_explicit
 from mbe.expressions import MBEn
 alphabet = symbols('a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z')
 "
-echo ${SETUP}
+echo "${SETUP}"
 
 echo "1st-order explicit vs. recursive"
 python -m timeit -r 5 -s "${SETUP}" "MBE1_explicit(alphabet)"

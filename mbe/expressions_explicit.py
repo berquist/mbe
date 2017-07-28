@@ -1,7 +1,6 @@
 """mbe.expressions_explicit: Explicit formulation of formulas in
 mbe.expressions for some low orders. Useful for testing."""
 
-from sympy import prod
 from itertools import combinations
 
 
@@ -152,20 +151,3 @@ def MBE6_itertools(f):
     return MBE5_itertools(f) + E6gen(f)
 def MBE7_itertools(f):
     return MBE6_itertools(f) + E7gen(f)
-
-
-def main():
-    """If this file is run as a script, ... (does nothing right now)"""
-
-    from sympy import symbols
-
-    f2 = symbols('a, b')
-    f3 = symbols('a, b, c')
-    f4 = symbols('a, b, c, d')
-    f5 = symbols('a, b, c, d, e')
-    f6 = symbols('a, b, c, d, e, f')
-    f7 = symbols('a, b, c, d, e, f, g')
-
-
-if __name__ == "__main__":
-    main()

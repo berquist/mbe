@@ -5,7 +5,7 @@ from __future__ import print_function
 
 import os.path
 
-
+from .fragment import combine_fragment_sequence
 
 
 def read_xyz(filename):
@@ -84,7 +84,7 @@ def write_fragment_section_qchem(fragments, filename=None, stdout=True, bookends
 
     # Make a supersystem fragment so that we can get the total charge
     # and multiplicity.
-    superfrag = mbe.fragment.combine_fragment_sequence(fragments)
+    superfrag = combine_fragment_sequence(fragments)
 
     blocks = []
 
@@ -138,6 +138,8 @@ def write_fragment_section_psi(fragments, filename=None, stdout=True):
             blocks.append(satemp.format(atomsym, *atomcoords))
     del blocks[0]
 
+    section = '\n'.join(blocks)
+
     if not filename:
         if stdout:
             print(section)
@@ -155,7 +157,7 @@ def write_supersystem_qchem(fragments, filename=None, stdout=True, bookends=Fals
 
     # Make a supersystem fragment so that we can get the total charge
     # and multiplicity.
-    superfrag = mbe.fragment.combine_fragment_sequence(fragments)
+    superfrag = combine_fragment_sequence(fragments)
 
     blocks = []
 

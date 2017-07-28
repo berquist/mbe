@@ -31,20 +31,3 @@ def MBEn(f, n):
         return En(f, n)
     else:
         return En(f, n) + MBEn(f, n - 1)
-
-
-def main():
-    """If this file is run as a script, ... (does nothing right now)"""
-
-    from sympy import symbols
-
-    f2 = symbols('a, b')
-    f3 = symbols('a, b, c')
-    f4 = symbols('a, b, c, d')
-    f5 = symbols('a, b, c, d, e')
-    f6 = symbols('a, b, c, d, e, f')
-    f7 = symbols('a, b, c, d, e, f, g')
-
-
-if __name__ == '__main__':
-    main()
