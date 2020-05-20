@@ -1,7 +1,7 @@
 """mbe.xyz_operations: Functions for dealing with XYZ (*.xyz) files.
 (reading, writing, etc.)"""
 
-from __future__ import print_function
+
 
 import os.path
 

@@ -3,6 +3,7 @@ Batch Scheduler (PBS) job scheduling system."""
 
 import os
 import subprocess
+from collections import defaultdict
 
 import mbe
 
@@ -23,12 +24,9 @@ def read_nodefile(path):
 
 def make_nodefile_map_nodes_to_cores(nodefile_list):
     """"""
-    nodefile_map = dict()
+    nodefile_map = defaultdict(int)
     for node in nodefile_list:
-        if node in nodefile_map.keys():
-            nodefile_map[node] += 1
-        else:
-            nodefile_map[node] = 1
+        nodefile_map[node] += 1
     return nodefile_map
 
 

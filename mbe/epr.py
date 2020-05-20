@@ -37,7 +37,7 @@ def calculate_gtensor(expr, map_frag_results):
     ...
     """
     tot_gmat = 0
-    map_symbols_frag = mbe.utils.gen_dict_symbol2fragment(map_frag_results.keys())
+    map_symbols_frag = mbe.utils.gen_dict_symbol2fragment(list(map_frag_results.keys()))
     exact_term_tuples = expr.as_terms()[0]
     for exact_term in exact_term_tuples:
         term = exact_term[0].as_coeff_Mul()

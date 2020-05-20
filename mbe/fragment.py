@@ -41,7 +41,7 @@ class Fragment(object):
 
         if not hasattr(self, 'formula'):
             self.formula = self._make_formula_dict()
-        pieces = sorted(self.formula.items(), key=lambda x: x[0])
+        pieces = sorted(list(self.formula.items()), key=lambda x: x[0])
         strpieces = []
         for piece in pieces:
             if piece[1] == 1:

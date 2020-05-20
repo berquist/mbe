@@ -3,7 +3,7 @@
 """droplet.py: Routines for working with the CO2-IL droplet XYZ
 files."""
 
-from __future__ import print_function
+
 
 import os
 from glob import glob
