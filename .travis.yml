@@ -1,16 +1,11 @@
+---
 sudo: false
 language: python
 python:
-  - 3.6
+  - 3.8
 
 cache:
   pip: true
-
-before_script:
-  - export "PYTHONPATH=$(pwd):$PYTHONPATH"
-
-install:
-  - pip install -r requirements.txt
 
 script:
   - pytest -v
